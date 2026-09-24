@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0d9488">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>빠른 간편 접수 | 모바일 셀프체크인</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <link rel="stylesheet" href="style.css?v=8">
+    <!-- Dynamic Gateway config -->
+    <script src="/config.js?v=2"></script>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- Top App Bar / Header -->
+        <header class="app-bar">
+            <div class="header-brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-hospital-user"></i>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-badge">QUICK CHECK-IN</span>
+                    <h1 class="brand-title">모바일 간편 접수</h1>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button type="button" class="icon-btn" id="btn-refresh" title="새로고침" onclick="resetForm()">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs between /quick and /quicklist -->
+        <nav class="sub-nav">
+            <a href="/quick/" class="nav-tab active">
+                <i class="fa-solid fa-hospital-user"></i>
+                <span>간편 접수</span>
+            </a>
+            <a href="/quicklist/" class="nav-tab">
+                <i class="fa-solid fa-users-viewfinder"></i>
+                <span>실시간 대기열</span>
+            </a>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Form View -->
+            <section id="form-view" class="view-panel active">
+                <div class="hero-banner">
+                    <div class="hero-pill">
+                        <span class="live-dot"></span> 비대면 셀프 접수
+                    </div>
+                    <h2>환자 정보를 입력해주세요</h2>
+                    <p>등록된 이름과 생년월일로 대기열에 바로 등록됩니다.</p>
+                </div>
+
+                <!-- Hospital Clinic Operating Hours Information Card -->
+                <div class="clinic-info-card" id="clinic-info-card">
+                    <div class="clinic-info-header">
+                        <div class="clinic-info-title">
+                            <i class="fa-solid fa-hospital"></i>
+                            <span>병원 진료시간 안내</span>
+                        </div>
+                        <div class="clinic-status-tag open" id="clinic-status-tag">
+                            <span class="status-pulse-dot"></span>
+                            <span id="clinic-status-badge-text">진료 중</span>
+                        </div>
+                    </div>
+                    <div class="clinic-info-body">
+                        <div class="hours-highlight">
+                            <i class="fa-regular fa-clock"></i>
+                            <span id="clinic-hours-display">10:00 ~ 18:00 (목·금·토·일·월 진료)</span>
+                        </div>
+                        <div class="hours-chips">
+                            <span class="chip-badge closed-day"><i class="fa-solid fa-calendar-xmark"></i> 매주 화·수요일(2일) 휴진</span>
+                            <span class="chip-badge weekend"><i class="fa-solid fa-calendar-check"></i> 토·일요일 주말 정상진료</span>
+                            <span class="chip-badge lunch"><i class="fa-solid fa-utensils"></i> 점심 12:00 ~ 13:30</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clinic Closed / Server Down Alert Banner -->
+                <div id="clinic-closed-banner" class="alert-banner warning" style="display:none;">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <div class="banner-text">
+                        <strong id="closed-banner-title">현재 진료시간이 아닙니다</strong>
+                        <p id="closed-banner-desc">현재 진료시간이 아니거나 진료준비중입니다. 진료시간 내에 접수해 주세요.</p>
+                    </div>
+                </div>
+
+                <form id="quick-checkin-form" onsubmit="handleFormSubmit(event)" novalidate>
+                    <!-- Patient Name Input -->
+                    <div class="input-card">
+                        <label for="pname" class="input-label">
+                            <i class="fa-solid fa-user"></i>
+                            <span>성명 (이름)</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="text" 
+                                id="pname" 
+                                name="pname" 
+                                class="form-input" 
+                                placeholder="환자 성명 입력 (예: 홍길동)" 
+                                autocomplete="off" 
+                                autocorrect="off"
+                                spellcheck="false"
+                                required
+                            >
+                            <button type="button" class="clear-input-btn" onclick="clearField('pname')" id="clear-pname-btn" style="display:none;">
+                                <i class="fa-solid fa-circle-xmark"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Birthdate Input with Dual Mode (Numeric 6/8 digits or Date Picker) -->
+                    <div class="input-card">
+                        <div class="label-row">
+                            <label for="birth-numeric" class="input-label">
+                                <i class="fa-solid fa-calendar-day"></i>
+                                <span>생년월일</span>
+                            </label>
+                            <button type="button" class="mode-toggle-btn" id="btn-toggle-picker" onclick="toggleBirthInputMode()">
+                                <i class="fa-regular fa-calendar"></i>
+                                <span id="toggle-picker-label">달력으로 선택</span>
+                            </button>
+                        </div>
+
+                        <!-- 1) Numeric Easy Input (Default for mobile phone keypad) -->
+                        <div id="numeric-input-group" class="input-wrapper">
+                            <input 
+                                type="tel" 
+                                id="birth-numeric" 
+                                class="form-input" 
+                                placeholder="생년월일 6자리 (예: 880523)" 
+                                maxlength="8"
+                                inputmode="numeric"
+                                pattern="[0-9]*"
+                                autocomplete="off"
+                            >
+                            <button type="button" class="clear-input-btn" onclick="clearField('birth-numeric')" id="clear-birth-btn" style="display:none;">
+                                <i class="fa-solid fa-circle-xmark"></i>
+                            </button>
+                        </div>
+
+                        <!-- 2) Native Date Picker Input (Alternative) -->
+                        <div id="date-picker-group" class="input-wrapper" style="display:none;">
+                            <input 
+                                type="date" 
+                                id="pbirth" 
+                                class="form-input date-native"
+                            >
+                        </div>
+
+                        <!-- Real-time formatted preview helper -->
+                        <div class="helper-box" id="birth-helper">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <span id="birth-helper-text">주민등록번호 앞 6자리(YYMMDD) 또는 8자리를 입력하세요.</span>
+                        </div>
+                    </div>
+
+                    <!-- Error Alert Banner -->
+                    <div id="error-banner" class="alert-banner error" style="display:none;">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span id="error-message">오류가 발생했습니다.</span>
+                    </div>
+
+                    <!-- Submit Actions -->
+                    <div class="submit-dock">
+                        <button type="submit" id="submit-btn" class="btn-submit">
+                            <span class="btn-text">진료 접수하기</span>
+                            <i class="fa-solid fa-arrow-right-long"></i>
+                            <div class="spinner" id="btn-spinner" style="display:none;"></div>
+                        </button>
+                        <p class="terms-notice">
+                            처음 방문하시는 신규 환자분은 원무과 데스크에서 첫 진료 등록을 진행해주세요.
+                        </p>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Success Confirmation View -->
+            <section id="success-view" class="view-panel" style="display:none;">
+                <div class="ticket-card">
+                    <div class="ticket-header">
+                        <div class="check-circle-icon">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <h2>접수가 정상 완료되었습니다!</h2>
+                        <p class="ticket-sub">대기 순서가 되면 성함을 호명해 드립니다.</p>
+                    </div>
+
+                    <div class="ticket-divider">
+                        <div class="notch left"></div>
+                        <div class="dash-line"></div>
+                        <div class="notch right"></div>
+                    </div>
+
+                    <div class="ticket-body">
+                        <div class="info-row">
+                            <span class="info-label">환자 성명</span>
+                            <span class="info-value highlight-name" id="res-patient-name">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">생년월일</span>
+                            <span class="info-value" id="res-patient-birth">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">접수 일시</span>
+                            <span class="info-value" id="res-register-time">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">접수 구분</span>
+                            <span class="info-value badge-gubun" id="res-register-gubun">모바일</span>
+                        </div>
+                    </div>
+
+                    <div class="ticket-footer">
+                        <div class="notice-pill">
+                            <i class="fa-solid fa-bullhorn"></i>
+                            <span>원내 대기실에서 잠시만 대기해 주세요.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-dock">
+                    <a href="/quicklist/" class="btn-primary-action" id="btn-go-quicklist" onclick="cancelAutoRedirect(); window.location.href='/quicklist/'; return false;">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <span id="btn-go-quicklist-text">내 대기시간 실시간 조회</span>
+                    </a>
+                    <button type="button" class="btn-secondary-full" id="btn-add-another" onclick="cancelAutoRedirect(); resetForm();">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>다른 환자 추가 접수하기</span>
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification Toast Modal -->
+    <div id="toast" class="toast-popup" style="display:none;">
+        <span id="toast-text"></span>
+    </div>
+
+    <!-- Clinic Closed / Server Down Alert Modal Popup -->
+    <div id="clinic-closed-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-card">
+            <div class="modal-icon warning">
+                <i class="fa-solid fa-door-closed"></i>
+            </div>
+            <h3 id="modal-closed-title">현재 진료시간이 아닙니다</h3>
+            <p id="modal-closed-desc">
+                현재 진료시간이 아니거나 진료준비중이므로 접수가 불가능합니다.
+            </p>
+            <div class="clinic-hours-box">
+                <i class="fa-regular fa-clock"></i>
+                <span id="modal-hours-text">10:00 ~ 18:00 (매주 화·수요일 휴진 / 토·일 주말 정상진료 / 점심 12:00 ~ 13:30)</span>
+            </div>
+            <button type="button" class="btn-modal-close" onclick="closeClosedModal()">확인</button>
+        </div>
+    </div>
+
+    <script src="app.js?v=8"></script>
+</body>
+</html>

@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>병원 정보 관리 콘솔 | MTS Helpers</title>
+
+  <!-- Pretendard Webfont -->
+  <link rel="stylesheet" as="style" crossorigin
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <!-- FontAwesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #0d9488;
+      --primary-hover: #0f766e;
+      --primary-light: #f0fdfa;
+      --primary-glow: rgba(13, 148, 136, 0.2);
+
+      --secondary: #0284c7;
+      --secondary-hover: #0369a1;
+      --secondary-light: #f0f9ff;
+
+      --bg-body: #f1f5f9;
+      --bg-card: #ffffff;
+      --bg-sidebar: #0f172a;
+
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-light: #94a3b8;
+
+      --border: #e2e8f0;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--bg-sidebar);
+      color: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .sidebar-brand {
+      padding: 1.5rem 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      color: white;
+    }
+
+    .brand-info h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .brand-info span {
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+
+    .sidebar-menu {
+      padding: 1.25rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      flex: 1;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-sm);
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 0.92rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .menu-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .menu-item.active {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .sidebar-footer {
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.78rem;
+      color: #64748b;
+      text-align: center;
+    }
+
+    /* Main Area */
+    .main-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .top-bar {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .top-bar-left h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .top-bar-left p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .top-bar-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn-save {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.65rem 1.4rem;
+      border-radius: var(--radius-md);
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px var(--primary-glow);
+    }
+
+    .btn-save:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-reset {
+      background: #ffffff;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 0.65rem 1.1rem;
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-reset:hover {
+      background: #f8fafc;
+      color: #ef4444;
+      border-color: #fca5a5;
+    }
+
+    /* Content Area */
+    .content-area {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Live Preview Banner */
+    .preview-card {
+      background: linear-gradient(135deg, #0d9488 0%, #0891b2 100%);
+      color: white;
+      border-radius: var(--radius-lg);
+      padding: 1.75rem 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+    }
+
+    .preview-left h3 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 0.35rem;
+    }
+
+    .preview-left p {
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    .preview-badges {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-top: 0.8rem;
+    }
+
+    .preview-pill {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(5px);
+      padding: 0.3rem 0.8rem;
+      border-radius: 9999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-map-preview {
+      background: #03c75a;
+      color: white;
+      padding: 0.65rem 1.2rem;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s;
+    }
+
+    .btn-map-preview:hover {
+      background: #02b150;
+      transform: translateY(-2px);
+    }
+
+    /* Sections / Card Grid */
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.75rem;
+    }
+
+    @media (max-width: 900px) {
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+
+      body {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+      }
+
+      .sidebar-menu {
+        flex-direction: row;
+        overflow-x: auto;
+      }
+    }
+
+    .config-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .config-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .icon-basic {
+      background: #e0f2fe;
+      color: #0284c7;
+    }
+
+    .icon-location {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
+    .icon-hours {
+      background: #fef3c7;
+      color: #d97706;
+    }
+
+    .icon-doctor {
+      background: #ede9fe;
+      color: #7c3aed;
+    }
+
+    .icon-cert {
+      background: #fee2e2;
+      color: #e11d48;
+    }
+
+    .cert-alert-box {
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+      border-radius: var(--radius-sm);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .cert-alert-box h4 {
+      color: #9f1239;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .cert-alert-box p {
+      font-size: 0.85rem;
+      color: #be123c;
+      line-height: 1.5;
+    }
+
+    .cert-step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .cert-step-item {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.9rem 1.1rem;
+    }
+
+    .cert-step-item h5 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .cert-step-item p,
+    .cert-step-item code {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .cert-step-item code {
+      background: #e2e8f0;
+      color: #0f172a;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+
+    .config-card-header h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 1.15rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+      color: var(--text-main);
+    }
+
+    .form-group .hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.92rem;
+      font-family: inherit;
+      color: var(--text-main);
+      background: #ffffff;
+      transition: all 0.2s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    /* Weekday Checkbox Grid */
+    .weekday-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.4rem;
+      margin-top: 0.4rem;
+    }
+
+    .day-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0.6rem 0.2rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: #ffffff;
+      cursor: pointer;
+      user-select: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .day-btn input {
+      display: none;
+    }
+
+    .day-btn.closed {
+      background: #fee2e2;
+      border-color: #fca5a5;
+      color: #b91c1c;
+      font-weight: 700;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #0f172a;
+      color: white;
+      padding: 0.9rem 1.4rem;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      font-size: 0.92rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.success {
+      background: #064e3b;
+      border-left: 4px solid #10b981;
+    }
+
+    .toast.error {
+      background: #7f1d1d;
+      border-left: 4px solid #ef4444;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Left Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <i class="fa-solid fa-child-reaching"></i>
+      </div>
+      <div class="brand-info">
+        <h2 id="sb-clinic-name">김기중 소아청소년과</h2>
+        <span>병원 관리자 콘솔</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-menu">
+      <a href="/" class="menu-item">
+        <i class="fa-solid fa-house"></i>
+        <span>메인 안내 화면</span>
+      </a>
+      <a href="/quick/" class="menu-item" target="_blank">
+        <i class="fa-solid fa-mobile-screen-button"></i>
+        <span>모바일 간편 접수</span>
+      </a>
+      <a href="/quicklist/" class="menu-item" target="_blank">
+        <i class="fa-solid fa-users-viewfinder"></i>
+        <span>실시간 대기열</span>
+      </a>
+      <a href="/signage/" class="menu-item" target="_blank">
+        <i class="fa-solid fa-tv"></i>
+        <span>대기실 전광판</span>
+      </a>
+      <a href="/admin/" class="menu-item active">
+        <i class="fa-solid fa-sliders"></i>
+        <span>병원 정보 편집/설정</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      MTS Helpers v1.0.0 &copy; 2026
+    </div>
+  </aside>
+
+  <!-- Main Wrap -->
+  <div class="main-wrap">
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <h1>병원 정보 관리 및 환경 설정</h1>
+        <p>병원명, 네이버 지도 위치, 진료시간 및 의사 프로필을 실시간으로 편집합니다.</p>
+      </div>
+      <div class="top-bar-actions">
+        <button type="button" class="btn-reset" onclick="confirmResetDefaults()">
+          <i class="fa-solid fa-rotate-left"></i> 기본값 복원
+        </button>
+        <button type="button" class="btn-save" onclick="saveClinicProfile()">
+          <i class="fa-solid fa-check"></i> <span>변경사항 저장</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Content Area -->
+    <main class="content-area">
+      <!-- Live Preview Banner -->
+      <section class="preview-card">
+        <div class="preview-left">
+          <h3 id="prev-name">김기중 소아청소년과의원</h3>
+          <p id="prev-desc">아이들의 밝은 미소와 건강한 성장 | 대표원장: 김기중 (소아청소년과 전문의)</p>
+          <div class="preview-badges">
+            <span class="preview-pill"><i class="fa-solid fa-location-dot"></i> <span id="prev-addr">경기 수원시 팔달구 (매교역 2번
+                출구)</span></span>
+            <span class="preview-pill"><i class="fa-solid fa-phone"></i> <span
+                id="prev-phone">031-234-5678</span></span>
+            <span class="preview-pill"><i class="fa-regular fa-clock"></i> <span id="prev-hours">10:00 ~ 18:00 (화·수
+                휴진)</span></span>
+          </div>
+        </div>
+        <div>
+          <a id="prev-map-btn" href="https://naver.me/GgUzsloE" target="_blank" class="btn-map-preview">
+            <i class="fa-solid fa-map-location-dot"></i> 네이버 지도 확인
+          </a>
+        </div>
+      </section>
+
+      <!-- 4 Cards Grid -->
+      <div class="card-grid">
+        <!-- 1. 기본 정보 카드 -->
+        <div class="config-card">
+          <div class="config-card-header">
+            <div class="header-icon icon-basic"><i class="fa-solid fa-hospital"></i></div>
+            <h3>1. 병원 기본 정보</h3>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="adm-clinic-name">병원명 (국문) *</label>
+              <input type="text" id="adm-clinic-name" class="form-control" placeholder="김기중 소아청소년과의원" required>
+            </div>
+            <div class="form-group">
+              <label for="adm-clinic-en">병원 영문명</label>
+              <input type="text" id="adm-clinic-en" class="form-control" placeholder="KIM KI JOONG PEDIATRICS">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="adm-insucode">요양기관기호</label>
+              <input type="text" id="adm-insucode" class="form-control" placeholder="41334655">
+            </div>
+            <div class="form-group">
+              <label for="adm-phone">대표 전화번호</label>
+              <input type="text" id="adm-phone" class="form-control" placeholder="031-234-5678">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="adm-doctor-name">대표 원장 성명</label>
+              <input type="text" id="adm-doctor-name" class="form-control" placeholder="김기중">
+            </div>
+            <div class="form-group">
+              <label for="adm-doctor-title">원장 직함 / 표기명</label>
+              <input type="text" id="adm-doctor-title" class="form-control" placeholder="김기중 원장">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="adm-specialty">전문의 자격</label>
+              <input type="text" id="adm-specialty" class="form-control" placeholder="소아청소년과 전문의">
+            </div>
+            <div class="form-group">
+              <label for="adm-dept-name">진료 과목명</label>
+              <input type="text" id="adm-dept-name" class="form-control" placeholder="소아청소년과">
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. 위치 및 네이버 지도 설정 카드 -->
+        <div class="config-card">
+          <div class="config-card-header">
+            <div class="header-icon icon-location"><i class="fa-solid fa-map-location-dot"></i></div>
+            <h3>2. 병원 위치 및 지도 설정</h3>
+          </div>
+
+          <div class="form-group">
+            <label for="adm-address">병원 주소 *</label>
+            <input type="text" id="adm-address" class="form-control" placeholder="경기 수원시 팔달구 (매교역 2번 출구)" required>
+            <div class="hint">환자 및 보호자가 내원할 수 있는 상세 주소를 입력하세요.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="adm-directions">오시는 길 / 지하철 안내</label>
+            <input type="text" id="adm-directions" class="form-control" placeholder="수인분당선 매교역 2번 출구 바로 앞">
+            <div class="hint">지하철역 출구, 층수, 건물명 등을 상세히 안내할 수 있습니다.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="adm-map-url">네이버 지도 링크 URL *</label>
+            <div style="display: flex; gap: 0.5rem;">
+              <input type="url" id="adm-map-url" class="form-control" placeholder="https://naver.me/GgUzsloE" required>
+              <a id="btn-adm-test-map" href="#" target="_blank" class="btn-reset"
+                style="white-space: nowrap; display: inline-flex; align-items: center; gap: 0.3rem;">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> 열기
+              </a>
+            </div>
+            <div class="hint">네이버 지도 앱 및 웹에서 즉시 길찾기를 열 수 있는 링크(naver.me)를 입력합니다.</div>
+          </div>
+        </div>
+
+        <!-- 3. 진료 시간 및 휴진일 카드 -->
+        <div class="config-card">
+          <div class="config-card-header">
+            <div class="header-icon icon-hours"><i class="fa-regular fa-clock"></i></div>
+            <h3>3. 진료 시간 및 휴진일 설정</h3>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="adm-open-time">진료 시작 시간</label>
+              <input type="time" id="adm-open-time" class="form-control" value="10:00">
+            </div>
+            <div class="form-group">
+              <label for="adm-close-time">진료 종료 시간</label>
+              <input type="time" id="adm-close-time" class="form-control" value="18:00">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="adm-lunch-start">점심 시작 시간</label>
+              <input type="time" id="adm-lunch-start" class="form-control" value="12:00">
+            </div>
+            <div class="form-group">
+              <label for="adm-lunch-end">점심 종료 시간</label>
+              <input type="time" id="adm-lunch-end" class="form-control" value="13:30">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>정기 휴진 요일 (빨간색: 휴진 지정)</label>
+            <div class="weekday-grid">
+              <label class="day-btn" id="adm-day-0"><input type="checkbox" name="adm_closed_day" value="0">월</label>
+              <label class="day-btn" id="adm-day-1"><input type="checkbox" name="adm_closed_day" value="1">화</label>
+              <label class="day-btn" id="adm-day-2"><input type="checkbox" name="adm_closed_day" value="2">수</label>
+              <label class="day-btn" id="adm-day-3"><input type="checkbox" name="adm_closed_day" value="3">목</label>
+              <label class="day-btn" id="adm-day-4"><input type="checkbox" name="adm_closed_day" value="4">금</label>
+              <label class="day-btn" id="adm-day-5"><input type="checkbox" name="adm_closed_day" value="5">토</label>
+              <label class="day-btn" id="adm-day-6"><input type="checkbox" name="adm_closed_day" value="6">일</label>
+            </div>
+            <div class="hint">지정된 요일에는 모바일 접수가 차단되며 휴진 안내 메시지가 표시됩니다.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="adm-closed-text">휴진일 표시 문구</label>
+            <input type="text" id="adm-closed-text" class="form-control" placeholder="매주 화·수요일(2일) 휴진">
+          </div>
+
+          <div class="form-group">
+            <label for="adm-hours-text">진료시간 요약 안내 문구</label>
+            <input type="text" id="adm-hours-text" class="form-control"
+              placeholder="10:00 ~ 18:00 (매주 화·수요일 휴진 / 토·일 주말 정상진료)">
+          </div>
+
+          <div class="form-group">
+            <label for="adm-notice-text">환자 안내 및 공지사항</label>
+            <textarea id="adm-notice-text" class="form-control" rows="2"
+              placeholder="* 접수 마감은 진료 종료 30분 전까지입니다."></textarea>
+          </div>
+        </div>
+
+        <!-- 4. 의료진 소개 및 진료과목 카드 -->
+        <div class="config-card">
+          <div class="config-card-header">
+            <div class="header-icon icon-doctor"><i class="fa-solid fa-user-doctor"></i></div>
+            <h3>4. 의료진 소개 및 주요 진료과목</h3>
+          </div>
+
+          <div class="form-group">
+            <label for="adm-doctor-bio">원장 인사말 / 소개글</label>
+            <textarea id="adm-doctor-bio" class="form-control" rows="3"
+              placeholder="아이들의 건강한 성장과 밝은 미소를 위해 따뜻하고 세심하게 진료합니다."></textarea>
+            <div class="hint">메인 화면의 의료진 소개 섹션에 표기됩니다.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="adm-specialties">주요 진료과목 목록 (쉼표 ',' 구분)</label>
+            <textarea id="adm-specialties" class="form-control" rows="5"
+              placeholder="소아청소년과 일반 진료, 영유아 건강검진, 국가 필수 예방접종, 소아 감기·호흡기 질환, 소아 알레르기·아토피·비염, 소아 소화기·성장 발달 상담"></textarea>
+            <div class="hint">쉼표(,)로 구분하여 입력하시면 메인 페이지에 예쁜 뱃지 태그로 나열됩니다.</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <i id="toast-icon" class="fa-solid fa-circle-check"></i>
+    <span id="toast-msg">저장되었습니다.</span>
+  </div>
+
+  <script>
+    let clinicData = {};
+
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById("toast");
+      const msgEl = document.getElementById("toast-msg");
+      const iconEl = document.getElementById("toast-icon");
+
+      msgEl.textContent = msg;
+      toast.className = `toast show ${isError ? 'error' : 'success'}`;
+      iconEl.className = isError ? "fa-solid fa-triangle-exclamation" : "fa-solid fa-circle-check";
+
+      setTimeout(() => {
+        toast.className = "toast";
+      }, 3500);
+    }
+
+    async function loadData() {
+      try {
+        const res = await fetch("/api/clinic/info");
+        if (!res.ok) throw new Error("병원 정보를 불러오지 못했습니다.");
+        clinicData = await res.json();
+        populateUI(clinicData);
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    function populateUI(d) {
+      // Sidebar & Preview
+      document.getElementById("sb-clinic-name").textContent = d.clinic_name || "김기중 소아청소년과";
+      document.getElementById("prev-name").textContent = d.clinic_name || "김기중 소아청소년과의원";
+      document.getElementById("prev-desc").textContent = `${d.clinic_name || '김기중 소아청소년과의원'} | 대표원장: ${d.doctor_title || d.doctor_name || '김기중 원장'}`;
+      document.getElementById("prev-addr").textContent = d.address || "경기 수원시 팔달구 (매교역 2번 출구)";
+      document.getElementById("prev-phone").textContent = d.phone || "031-234-5678";
+      document.getElementById("prev-hours").textContent = `${d.open_time || '10:00'} ~ ${d.close_time || '18:00'} (${d.closed_days_text || '휴진'})`;
+
+      const mapBtn = document.getElementById("prev-map-btn");
+      if (d.map_url) {
+        mapBtn.href = d.map_url;
+        mapBtn.style.display = "inline-flex";
+      }
+
+      // Form inputs
+      document.getElementById("adm-clinic-name").value = d.clinic_name || "";
+      document.getElementById("adm-clinic-en").value = d.clinic_name_en || "";
+      document.getElementById("adm-insucode").value = d.clinic_insucode || "";
+      document.getElementById("adm-phone").value = d.phone || "";
+      document.getElementById("adm-doctor-name").value = d.doctor_name || "";
+      document.getElementById("adm-doctor-title").value = d.doctor_title || "";
+      document.getElementById("adm-specialty").value = d.specialty || "";
+      document.getElementById("adm-dept-name").value = d.dept_name || "";
+
+      document.getElementById("adm-address").value = d.address || "";
+      document.getElementById("adm-directions").value = d.directions || "";
+      document.getElementById("adm-map-url").value = d.map_url || "";
+      updateTestMapBtn(d.map_url || "");
+
+      document.getElementById("adm-open-time").value = d.open_time || "10:00";
+      document.getElementById("adm-close-time").value = d.close_time || "18:00";
+      document.getElementById("adm-lunch-start").value = d.lunch_start || "12:00";
+      document.getElementById("adm-lunch-end").value = d.lunch_end || "13:30";
+      document.getElementById("adm-closed-text").value = d.closed_days_text || "";
+      document.getElementById("adm-hours-text").value = d.hours_text || "";
+      document.getElementById("adm-notice-text").value = d.notice_text || "";
+
+      document.getElementById("adm-doctor-bio").value = d.doctor_bio || "";
+      document.getElementById("adm-specialties").value = Array.isArray(d.specialties) ? d.specialties.join(", ") : "";
+
+      // Weekdays
+      const closedDays = Array.isArray(d.closed_weekdays) ? d.closed_weekdays : [1, 2];
+      for (let i = 0; i < 7; i++) {
+        const chk = document.querySelector(`input[name="adm_closed_day"][value="${i}"]`);
+        const lbl = document.getElementById(`adm-day-${i}`);
+        if (chk && lbl) {
+          const isClosed = closedDays.includes(i);
+          chk.checked = isClosed;
+          lbl.classList.toggle("closed", isClosed);
+        }
+      }
+    }
+
+    function updateTestMapBtn(url) {
+      const btn = document.getElementById("btn-adm-test-map");
+      if (url && (url.startsWith("http://") || url.startsWith("https://"))) {
+        btn.href = url;
+        btn.style.display = "inline-flex";
+      } else {
+        btn.style.display = "none";
+      }
+    }
+
+    document.getElementById("adm-map-url").addEventListener("input", (e) => {
+      updateTestMapBtn(e.target.value.trim());
+    });
+
+    document.querySelectorAll(".day-btn").forEach(lbl => {
+      lbl.addEventListener("click", () => {
+        setTimeout(() => {
+          const chk = lbl.querySelector('input[type="checkbox"]');
+          lbl.classList.toggle("closed", chk.checked);
+        }, 10);
+      });
+    });
+
+    async function saveClinicProfile() {
+      const name = document.getElementById("adm-clinic-name").value.trim();
+      const addr = document.getElementById("adm-address").value.trim();
+
+      if (!name) {
+        alert("병원명을 입력해주세요.");
+        return;
+      }
+
+      const closed_weekdays = [];
+      document.querySelectorAll('input[name="adm_closed_day"]:checked').forEach(c => {
+        closed_weekdays.push(parseInt(c.value, 10));
+      });
+
+      const rawSpecialties = document.getElementById("adm-specialties").value;
+      const specialties = rawSpecialties.split(/[,;\n]/).map(s => s.trim()).filter(Boolean);
+
+      const payload = {
+        clinic_name: name,
+        clinic_name_en: document.getElementById("adm-clinic-en").value.trim(),
+        clinic_insucode: document.getElementById("adm-insucode").value.trim(),
+        phone: document.getElementById("adm-phone").value.trim(),
+        doctor_name: document.getElementById("adm-doctor-name").value.trim(),
+        doctor_title: document.getElementById("adm-doctor-title").value.trim(),
+        specialty: document.getElementById("adm-specialty").value.trim(),
+        dept_name: document.getElementById("adm-dept-name").value.trim(),
+
+        address: addr,
+        directions: document.getElementById("adm-directions").value.trim(),
+        map_url: document.getElementById("adm-map-url").value.trim(),
+
+        open_time: document.getElementById("adm-open-time").value,
+        close_time: document.getElementById("adm-close-time").value,
+        lunch_start: document.getElementById("adm-lunch-start").value,
+        lunch_end: document.getElementById("adm-lunch-end").value,
+        closed_weekdays: closed_weekdays,
+        closed_days_text: document.getElementById("adm-closed-text").value.trim(),
+        hours_text: document.getElementById("adm-hours-text").value.trim(),
+        notice_text: document.getElementById("adm-notice-text").value.trim(),
+
+        doctor_bio: document.getElementById("adm-doctor-bio").value.trim(),
+        specialties: specialties
+      };
+
+      try {
+        const res = await fetch("/api/clinic/info", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "저장에 실패했습니다.");
+        }
+
+        const resData = await res.json();
+        clinicData = resData.data;
+        populateUI(clinicData);
+        showToast("병원 정보가 성공적으로 저장되었습니다!");
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    async function confirmResetDefaults() {
+      if (confirm("정말로 모든 병원 설정을 기본값(김기중 소아청소년과의원)으로 복원하시겠습니까?")) {
+        try {
+          const res = await fetch("/api/clinic/info/reset", { method: "POST" });
+          if (!res.ok) throw new Error("초기화 실패");
+          const data = await res.json();
+          clinicData = data.data;
+          populateUI(clinicData);
+          showToast("기본값으로 복원되었습니다.");
+        } catch (err) {
+          showToast(err.message, true);
+        }
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadData);
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0d9488">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>실시간 진료 대기열 | 모바일 대기안내</title>
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <link rel="stylesheet" href="style.css?v=5">
+    <!-- Dynamic Gateway config -->
+    <script src="/config.js?v=2"></script>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- Top App Bar -->
+        <header class="app-bar">
+            <div class="header-brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-list-check"></i>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-badge">LIVE QUEUE</span>
+                    <h1 class="brand-title">실시간 대기 현황</h1>
+                </div>
+            </div>
+            <div class="header-actions">
+                <span class="live-pill">
+                    <span class="live-dot"></span> LIVE
+                </span>
+                <button type="button" class="icon-btn" id="btn-refresh" title="새로고침" onclick="manualRefresh()">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs between /quick and /quicklist -->
+        <nav class="sub-nav">
+            <a href="/quick/" class="nav-tab">
+                <i class="fa-solid fa-hospital-user"></i>
+                <span>간편 접수</span>
+            </a>
+            <a href="/quicklist/" class="nav-tab active">
+                <i class="fa-solid fa-users-viewfinder"></i>
+                <span>실시간 대기열</span>
+            </a>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Digital Clock Bar -->
+            <div class="clock-bar">
+                <div class="clock-date" id="current-date">----년 --월 --일</div>
+                <div class="clock-time" id="current-time">--:--:--</div>
+            </div>
+
+            <!-- Clinic Closed / Server Off Alert Banner -->
+            <div id="clinic-closed-banner" class="alert-banner warning" style="display: none;">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <div class="alert-content">
+                    <strong>진료 마감 (진료시간 외)</strong>
+                    <span id="closed-banner-text">현재 진료시간이 아니거나 진료준비중입니다.</span>
+                </div>
+            </div>
+
+            <!-- Personalized Wait Banner (Shown if recently registered on this phone) -->
+            <div id="my-wait-banner" class="my-wait-card" style="display:none;">
+                <div class="my-wait-header">
+                    <div class="patient-pill">
+                        <i class="fa-solid fa-circle-user"></i>
+                        <span id="my-patient-name">환자</span>님
+                    </div>
+                    <button type="button" class="btn-clear-my" onclick="clearMyPatient()" title="내 정보 해제">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="my-wait-body">
+                    <div class="my-stat-item">
+                        <span class="my-stat-label">내 대기 순번</span>
+                        <span class="my-stat-value primary" id="my-queue-pos">--번째</span>
+                    </div>
+                    <div class="my-divider"></div>
+                    <div class="my-stat-item">
+                        <span class="my-stat-label">앞 대기 인원</span>
+                        <span class="my-stat-value" id="my-ahead-count">--명</span>
+                    </div>
+                </div>
+                <div class="my-wait-footer">
+                    <i class="fa-solid fa-bell"></i>
+                    <span id="my-status-hint">순서가 가까워지면 원내 대기실에서 대기해 주세요.</span>
+                </div>
+            </div>
+
+            <!-- Quick Summary Counters -->
+            <div class="summary-grid">
+                <div class="summary-card active-card">
+                    <div class="card-icon"><i class="fa-solid fa-stethoscope"></i></div>
+                    <div class="card-meta">
+                        <span class="card-label">현재 진료 중</span>
+                        <span class="card-value" id="count-treating">-</span>
+                    </div>
+                </div>
+                <div class="summary-card wait-card">
+                    <div class="card-icon"><i class="fa-solid fa-user-clock"></i></div>
+                    <div class="card-meta">
+                        <span class="card-label">총 대기 환자</span>
+                        <span class="card-value" id="count-waiting">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spot 1: Currently Treating Patient Card (Signage Feature) -->
+            <section class="section-card treating-spot">
+                <div class="section-title-row">
+                    <div class="badge-status treating">
+                        <i class="fa-solid fa-circle-play"></i> 현재 진료 중
+                    </div>
+                    <span class="room-pill" id="treating-room">1번 진료실</span>
+                </div>
+                <div class="spot-content">
+                    <div class="spot-name highlight" id="treating-name">진료 준비 중</div>
+                    <div class="spot-desc" id="treating-sub">담당 의료진 진료 진행 중</div>
+                </div>
+            </section>
+
+            <!-- Spot 2: Next Patient Card (Signage Feature) -->
+            <section class="section-card next-spot">
+                <div class="section-title-row">
+                    <div class="badge-status next">
+                        <i class="fa-solid fa-forward"></i> 다음 순서
+                    </div>
+                    <span class="room-pill" id="next-room">1번 진료실</span>
+                </div>
+                <div class="spot-content">
+                    <div class="spot-name" id="next-name">대기 없음</div>
+                    <div class="spot-desc" id="next-sub">진료실 입장을 준비해 주세요</div>
+                </div>
+            </section>
+
+            <!-- Spot 3: Full Waiting Patient List (Signage Feature) -->
+            <section class="waiting-section">
+                <div class="waiting-header">
+                    <h3><i class="fa-solid fa-users"></i> 대기 순번 목록</h3>
+                    <span class="total-badge" id="list-total-badge">대기 0명</span>
+                </div>
+
+                <div class="waiting-list-container">
+                    <ul id="waiting-patients-list" class="waiting-list">
+                        <li class="loading-item">
+                            <div class="mini-spinner"></div>
+                            <span>대기 명단을 불러오는 중입니다...</span>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Privacy Notice Footer -->
+            <div class="privacy-notice">
+                <i class="fa-solid fa-shield-halved"></i>
+                <p>개인정보 보호법에 따라 환자 성함의 일부는 마스킹(*) 처리되어 표시됩니다.</p>
+            </div>
+        </main>
+
+        <!-- Bottom Action Bar / Quick Checkin Button -->
+        <footer class="app-bottom-bar">
+            <a href="/quick/" class="btn-dock-action">
+                <i class="fa-solid fa-user-plus"></i>
+                <span>새로운 환자 간편 접수하기</span>
+            </a>
+        </footer>
+    </div>
+
+    <!-- Toast Popup -->
+    <div id="toast" class="toast-popup" style="display:none;">
+        <span id="toast-text"></span>
+    </div>
+
+    <script src="app.js?v=6"></script>
+</body>
+</html>

@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title id="page-title">김기중 소아청소년과의원 | 환자 중심의 편리한 진료</title>
+  
+  <!-- Pretendard Webfont -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <!-- FontAwesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <link rel="stylesheet" href="/static/styles.css?v=2">
+  <!-- Dynamic Port Config -->
+  <script src="/config.js"></script>
+</head>
+<body>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-child-reaching"></i>
+        </div>
+        <div class="brand-text">
+          <h1 id="header-clinic-name">김기중 소아청소년과의원</h1>
+          <p id="header-clinic-en">KIM KI JOONG PEDIATRICS</p>
+        </div>
+      </div>
+
+      <!-- Actions Group (Status Badge + Admin Edit Button) -->
+      <div class="header-actions-group">
+        <div class="status-badge-container">
+          <div id="clinic-status-badge" class="clinic-status-badge">
+            <span class="status-dot pulse"></span>
+            <span id="clinic-status-text">진료 상태 확인 중...</span>
+          </div>
+        </div>
+        <button type="button" class="btn-admin-gear" onclick="openAdminModal()" title="병원 정보 편집 및 환경 설정">
+          <i class="fa-solid fa-gear"></i>
+          <span>병원 정보 관리</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-pill" id="hero-pill-hours">
+        <i class="fa-regular fa-clock"></i> 토·일 주말 정상 진료 (화·수 휴진)
+      </div>
+      <h2 class="hero-title">
+        아이들의 밝은 미소와 건강한 성장<br>
+        <span id="hero-clinic-name">김기중 소아청소년과의원</span>에 오신 것을 환영합니다
+      </h2>
+      <p class="hero-desc">
+        스마트폰으로 간편하게 진료를 접수하고 실시간 대기 순번을 확인하세요. 환자와 보호자분의 소중한 시간을 아껴드립니다.
+      </p>
+
+      <!-- 3 Core Service Cards -->
+      <div class="services-grid">
+        <!-- 1. Quick Check-in -->
+        <a href="/quick/" class="service-card card-quick">
+          <div>
+            <div class="card-top">
+              <div class="card-icon">
+                <i class="fa-solid fa-mobile-screen-button"></i>
+              </div>
+              <span class="badge-tag">SELF CHECK-IN</span>
+            </div>
+            <h3>모바일 간편 접수</h3>
+            <p>병원 방문 후 접수대 대기 없이 스마트폰으로 성명과 생년월일만으로 즉시 당일 진료 접수를 진행합니다.</p>
+          </div>
+          <div class="card-action">
+            <span>접수하기</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </a>
+
+        <!-- 2. Real-time Waitlist -->
+        <a href="/quicklist/" class="service-card card-quicklist">
+          <div>
+            <div class="card-top">
+              <div class="card-icon">
+                <i class="fa-solid fa-users-viewfinder"></i>
+              </div>
+              <span class="badge-tag">LIVE QUEUE</span>
+            </div>
+            <h3>실시간 대기 현황</h3>
+            <p>현재 내 진료 순서와 대기 환자 수를 실시간으로 확인하여 원내 또는 주변에서 편리하게 대기하세요.</p>
+          </div>
+          <div class="card-action">
+            <span>대기열 보기</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </a>
+
+        <!-- 3. Waiting Room Signage -->
+        <a href="/signage/" class="service-card card-signage">
+          <div>
+            <div class="card-top">
+              <div class="card-icon">
+                <i class="fa-solid fa-tv"></i>
+              </div>
+              <span class="badge-tag">DID DISPLAY</span>
+            </div>
+            <h3>대기실 전광판</h3>
+            <p>대기실 대형 모니터 및 TV 화면에 현재 진료 환자 및 다음 진료 순서를 크고 명확하게 안내합니다.</p>
+          </div>
+          <div class="card-action">
+            <span>전광판 열기</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Info Section (Hours & Doctor) -->
+  <main class="container">
+    <div class="grid-2col">
+      <!-- Operating Hours Card -->
+      <div class="info-card">
+        <div class="section-tag"><i class="fa-regular fa-calendar-check"></i> Clinic Hours</div>
+        <h3 class="section-title">진료 시간 안내</h3>
+
+        <table class="hours-table">
+          <tbody>
+            <tr>
+              <th>평일 진료</th>
+              <td class="highlight" id="hours-weekday-text">10:00 ~ 18:00</td>
+            </tr>
+            <tr>
+              <th>토요일 · 일요일</th>
+              <td class="highlight" id="hours-weekend-text">10:00 ~ 18:00 (주말 정상진료)</td>
+            </tr>
+            <tr>
+              <th>점심 시간</th>
+              <td id="hours-lunch-text">12:00 ~ 13:30</td>
+            </tr>
+            <tr>
+              <th>정기 휴진</th>
+              <td class="closed-day" id="hours-closed-text">매주 화요일 · 수요일 (주 2회 휴진)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="hours-notice" id="hours-notice-text">
+          <strong><i class="fa-solid fa-circle-info"></i> 안내사항:</strong><br>
+          * 접수 마감은 진료 종료 30분 전까지입니다.<br>
+          * 주말(토·일)에도 평일과 동일하게 오전 10시부터 오후 6시까지 정상 진료합니다.
+        </div>
+      </div>
+
+      <!-- Doctor Introduction Card -->
+      <div class="info-card">
+        <div class="section-tag"><i class="fa-solid fa-user-doctor"></i> Medical Staff</div>
+        <h3 class="section-title">의료진 소개</h3>
+
+        <div class="doctor-profile" style="margin-top: 1rem;">
+          <div class="doctor-avatar">
+            <i class="fa-solid fa-user-doctor"></i>
+          </div>
+          <div class="doctor-info">
+            <h4 id="doctor-title-display">김기중 원장</h4>
+            <div class="doctor-specialty" id="doctor-specialty-display">소아청소년과 전문의</div>
+            <p class="doctor-bio" id="doctor-bio-display">
+              "아이들의 건강한 성장과 밝은 미소를 위해 따뜻하고 세심하게 진료합니다. 우리 아이의 평생 주치의가 되어드리겠습니다."
+            </p>
+          </div>
+        </div>
+
+        <div style="margin-top: 1.5rem;">
+          <div style="font-weight: 700; font-size: 0.92rem; margin-bottom: 0.6rem; color: var(--text-main);">
+            주요 진료 과목
+          </div>
+          <div class="specialties-list" id="specialties-container">
+            <span class="specialty-pill">소아청소년과 일반 진료</span>
+            <span class="specialty-pill">영유아 건강검진</span>
+            <span class="specialty-pill">국가 필수 예방접종</span>
+            <span class="specialty-pill">소아 감기·호흡기 질환</span>
+            <span class="specialty-pill">소아 알레르기·아토피·비염</span>
+            <span class="specialty-pill">소아 소화기·성장 발달 상담</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Location & Directions Section (병원 위치 및 오시는 길) -->
+    <div class="info-card location-card">
+      <div class="location-header">
+        <div>
+          <div class="section-tag"><i class="fa-solid fa-map-location-dot"></i> Location & Directions</div>
+          <h3 class="section-title">병원 위치 및 오시는 길</h3>
+        </div>
+        <a id="btn-naver-map" href="https://naver.me/GgUzsloE" target="_blank" rel="noopener noreferrer" class="btn-naver-map">
+          <i class="fa-solid fa-diamond-turn-right"></i>
+          <span>네이버 지도에서 보기</span>
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        </a>
+      </div>
+
+      <div class="location-content-grid">
+        <div class="location-item">
+          <div class="loc-icon"><i class="fa-solid fa-location-dot"></i></div>
+          <div>
+            <h4>병원 주소</h4>
+            <p id="display-address">경기 수원시 팔달구 (매교역 2번 출구)</p>
+          </div>
+        </div>
+
+        <div class="location-item">
+          <div class="loc-icon subway"><i class="fa-solid fa-train-subway"></i></div>
+          <div>
+            <h4>지하철 이용 시</h4>
+            <p id="display-directions">수인분당선 매교역 2번 출구 바로 앞</p>
+          </div>
+        </div>
+
+        <div class="location-item">
+          <div class="loc-icon phone"><i class="fa-solid fa-phone"></i></div>
+          <div>
+            <h4>전화 문의</h4>
+            <p id="display-phone">031-234-5678</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Guide Steps -->
+    <section class="section" style="margin-top: 1rem;">
+      <div class="section-header" style="text-align: center;">
+        <div class="section-tag">Easy & Fast Check-In</div>
+        <h3 class="section-title">모바일 간편 접수 이용 방법</h3>
+      </div>
+
+      <div class="guide-steps">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <h4>접수 화면 접속</h4>
+          <p>원내 비치된 QR코드를 스마트폰으로 스캔하거나 위 '모바일 간편 접수' 버튼을 누릅니다.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <h4>환자 정보 입력</h4>
+          <p>진료받으실 소아 환자의 성명과 생년월일을 입력하고 확인을 진행합니다.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <h4>접수 완료</h4>
+          <p>원내 EMR 차트와 연동되어 진료 대기열에 안전하게 등록됩니다.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-number">4</div>
+          <h4>실시간 대기 확인</h4>
+          <p>스마트폰 또는 대기실 전광판에서 내 순번을 확인 후 진료실로 입장합니다.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-top">
+        <div class="footer-brand" id="footer-clinic-name">김기중 소아청소년과의원</div>
+        <div class="footer-links">
+          <a href="/quick/">모바일 접수</a>
+          <a href="/quicklist/">실시간 대기열</a>
+          <a href="/signage/">대기실 전광판</a>
+          <a href="/admin/" style="color: var(--primary); font-weight: 600;"><i class="fa-solid fa-gear"></i> 병원 정보 관리</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div id="footer-meta-info">요양기관기호: 41334655 | 진료과목: 소아청소년과 | 원장: 김기중 | 위치: 경기 수원시 팔달구 (매교역 2번 출구)</div>
+        <div>&copy; <span id="footer-copyright-year"></span> <span id="footer-clinic-copy">김기중 소아청소년과의원</span>. All rights reserved.</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Admin Modal Dialog -->
+  <div id="admin-modal-backdrop" class="modal-backdrop">
+    <div class="modal-window">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-hospital-user" style="color: var(--primary);"></i> 병원 정보 편집 및 환경 설정</h3>
+        <button type="button" class="btn-close-modal" onclick="closeAdminModal()">&times;</button>
+      </div>
+
+      <!-- Modal Tabs -->
+      <div class="modal-tabs">
+        <button type="button" class="modal-tab-btn active" onclick="switchTab('basic', this)">
+          <i class="fa-solid fa-circle-info"></i> 기본 정보
+        </button>
+        <button type="button" class="modal-tab-btn" onclick="switchTab('location', this)">
+          <i class="fa-solid fa-map-pin"></i> 위치 & 지도
+        </button>
+        <button type="button" class="modal-tab-btn" onclick="switchTab('hours', this)">
+          <i class="fa-regular fa-clock"></i> 진료 시간 & 휴진
+        </button>
+        <button type="button" class="modal-tab-btn" onclick="switchTab('doctor', this)">
+          <i class="fa-solid fa-user-doctor"></i> 의료진 & 과목
+        </button>
+      </div>
+
+      <!-- Modal Body (Tab Panels) -->
+      <div class="modal-body">
+        <form id="clinic-info-form">
+          <!-- Tab 1: 기본 정보 -->
+          <div id="tab-panel-basic" class="tab-panel active">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="input-clinic-name">병원명 (국문)</label>
+                <input type="text" id="input-clinic-name" class="form-control" placeholder="예: 김기중 소아청소년과의원" required>
+              </div>
+              <div class="form-group">
+                <label for="input-clinic-en">병원 영문명</label>
+                <input type="text" id="input-clinic-en" class="form-control" placeholder="예: KIM KI JOONG PEDIATRICS">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="input-insucode">요양기관기호</label>
+                <input type="text" id="input-insucode" class="form-control" placeholder="8자리 기호 (예: 41334655)">
+              </div>
+              <div class="form-group">
+                <label for="input-phone">대표 전화번호</label>
+                <input type="text" id="input-phone" class="form-control" placeholder="예: 031-234-5678">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="input-doctor-name">대표 원장 성명</label>
+                <input type="text" id="input-doctor-name" class="form-control" placeholder="예: 김기중">
+              </div>
+              <div class="form-group">
+                <label for="input-doctor-title">원장 직함 / 표기명</label>
+                <input type="text" id="input-doctor-title" class="form-control" placeholder="예: 김기중 원장">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="input-specialty">전문의 자격</label>
+                <input type="text" id="input-specialty" class="form-control" placeholder="예: 소아청소년과 전문의">
+              </div>
+              <div class="form-group">
+                <label for="input-dept-name">진료 과목명</label>
+                <input type="text" id="input-dept-name" class="form-control" placeholder="예: 소아청소년과">
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 2: 위치 & 지도 -->
+          <div id="tab-panel-location" class="tab-panel">
+            <div class="form-group">
+              <label for="input-address">병원 주소</label>
+              <input type="text" id="input-address" class="form-control" placeholder="예: 경기 수원시 팔달구 (매교역 2번 출구)" required>
+              <div class="form-hint">환자가 찾아올 수 있는 도로명/지번 주소를 입력하세요.</div>
+            </div>
+
+            <div class="form-group">
+              <label for="input-directions">오시는 길 / 대중교통 안내</label>
+              <input type="text" id="input-directions" class="form-control" placeholder="예: 수인분당선 매교역 2번 출구 바로 앞">
+              <div class="form-hint">지하철역 출구 및 버스정류장 등 접근 경로를 안내합니다.</div>
+            </div>
+
+            <div class="form-group">
+              <label for="input-map-url">네이버 지도 링크 URL</label>
+              <div style="display: flex; gap: 0.5rem;">
+                <input type="url" id="input-map-url" class="form-control" placeholder="예: https://naver.me/GgUzsloE" required>
+                <a id="btn-test-map-url" href="#" target="_blank" class="btn-cancel" style="white-space: nowrap; display: inline-flex; align-items: center; gap: 0.3rem;">
+                  <i class="fa-solid fa-arrow-up-right-from-square"></i> 링크 확인
+                </a>
+              </div>
+              <div class="form-hint">네이버 플레이스 또는 네이버 지도 바로가기 단축 URL(naver.me)을 입력하세요.</div>
+            </div>
+          </div>
+
+          <!-- Tab 3: 진료 시간 & 휴진 -->
+          <div id="tab-panel-hours" class="tab-panel">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="input-open-time">진료 시작 시간</label>
+                <input type="time" id="input-open-time" class="form-control" value="10:00" required>
+              </div>
+              <div class="form-group">
+                <label for="input-close-time">진료 종료 시간</label>
+                <input type="time" id="input-close-time" class="form-control" value="18:00" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="input-lunch-start">점심 시작 시간</label>
+                <input type="time" id="input-lunch-start" class="form-control" value="12:00" required>
+              </div>
+              <div class="form-group">
+                <label for="input-lunch-end">점심 종료 시간</label>
+                <input type="time" id="input-lunch-end" class="form-control" value="13:30" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>정기 휴진 요일 선택 (빨간색: 휴진)</label>
+              <div class="weekday-checkbox-grid">
+                <label class="weekday-btn" id="lbl-day-0"><input type="checkbox" name="closed_weekday" value="0">월</label>
+                <label class="weekday-btn" id="lbl-day-1"><input type="checkbox" name="closed_weekday" value="1">화</label>
+                <label class="weekday-btn" id="lbl-day-2"><input type="checkbox" name="closed_weekday" value="2">수</label>
+                <label class="weekday-btn" id="lbl-day-3"><input type="checkbox" name="closed_weekday" value="3">목</label>
+                <label class="weekday-btn" id="lbl-day-4"><input type="checkbox" name="closed_weekday" value="4">금</label>
+                <label class="weekday-btn" id="lbl-day-5"><input type="checkbox" name="closed_weekday" value="5">토</label>
+                <label class="weekday-btn" id="lbl-day-6"><input type="checkbox" name="closed_weekday" value="6">일</label>
+              </div>
+              <div class="form-hint">체크된 요일은 정기 휴진일로 지정되어 모바일 접수가 자동으로 제한됩니다.</div>
+            </div>
+
+            <div class="form-group">
+              <label for="input-closed-text">휴진일 표시 안내 문구</label>
+              <input type="text" id="input-closed-text" class="form-control" placeholder="예: 매주 화·수요일(2일) 휴진">
+            </div>
+
+            <div class="form-group">
+              <label for="input-hours-text">대표 진료시간 문구</label>
+              <input type="text" id="input-hours-text" class="form-control" placeholder="예: 10:00 ~ 18:00 (매주 화·수요일 휴진 / 토·일 주말 정상진료)">
+            </div>
+
+            <div class="form-group">
+              <label for="input-notice-text">진료 안내 및 공지사항</label>
+              <textarea id="input-notice-text" class="form-control" rows="2" placeholder="* 접수 마감은 진료 종료 30분 전까지입니다."></textarea>
+            </div>
+          </div>
+
+          <!-- Tab 4: 의료진 & 과목 -->
+          <div id="tab-panel-doctor" class="tab-panel">
+            <div class="form-group">
+              <label for="input-doctor-bio">원장 인사말 / 소개</label>
+              <textarea id="input-doctor-bio" class="form-control" rows="3" placeholder="환자분들께 전하는 따뜻한 인사말을 입력하세요."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="input-specialties">주요 진료 과목 (쉼표 ',' 로 구분하여 입력)</label>
+              <textarea id="input-specialties" class="form-control" rows="3" placeholder="소아청소년과 일반 진료, 영유아 건강검진, 국가 필수 예방접종, 소아 감기·호흡기 질환, 소아 알레르기·아토피, 소화기 상담"></textarea>
+              <div class="form-hint">여러 항목은 쉼표(,)로 구분하시면 화면에 예쁜 태그 뱃지 형태로 표시됩니다.</div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn-reset" onclick="confirmResetDefaults()">
+          <i class="fa-solid fa-rotate-left"></i> 기본값 복원
+        </button>
+        <div class="modal-footer-right">
+          <button type="button" class="btn-cancel" onclick="closeAdminModal()">취소</button>
+          <button type="button" class="btn-save" onclick="saveClinicProfile()">
+            <i class="fa-solid fa-check"></i> <span>저장하기</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Feedback -->
+  <div id="toast" class="toast-notification">
+    <i id="toast-icon" class="fa-solid fa-circle-check"></i>
+    <span id="toast-msg">저장되었습니다.</span>
+  </div>
+
+  <!-- Main Scripts -->
+  <script>
+    let currentProfile = {};
+
+    function showToast(message, isError = false) {
+      const toast = document.getElementById("toast");
+      const msgEl = document.getElementById("toast-msg");
+      const iconEl = document.getElementById("toast-icon");
+      
+      msgEl.textContent = message;
+      toast.className = `toast-notification show ${isError ? 'error' : 'success'}`;
+      iconEl.className = isError ? "fa-solid fa-triangle-exclamation" : "fa-solid fa-circle-check";
+
+      setTimeout(() => {
+        toast.className = "toast-notification";
+      }, 3500);
+    }
+
+    async function loadClinicProfile() {
+      try {
+        const res = await fetch("/api/clinic/info");
+        if (!res.ok) throw new Error("Failed to load clinic info");
+        currentProfile = await res.json();
+        renderClinicProfile(currentProfile);
+      } catch (err) {
+        console.error("Error loading clinic profile:", err);
+      }
+    }
+
+    function renderClinicProfile(p) {
+      // 1. Headers & Titles
+      const name = p.clinic_name || "김기중 소아청소년과의원";
+      const en = p.clinic_name_en || "KIM KI JOONG PEDIATRICS";
+      document.title = `${name} | 환자 중심의 편리한 진료`;
+      document.getElementById("header-clinic-name").textContent = name;
+      document.getElementById("header-clinic-en").textContent = en;
+      document.getElementById("hero-clinic-name").textContent = name;
+      document.getElementById("footer-clinic-name").textContent = name;
+      document.getElementById("footer-clinic-copy").textContent = name;
+      document.getElementById("footer-copyright-year").textContent = new Date().getFullYear();
+
+      // 2. Hours & Badges
+      if (p.hours_text) {
+        document.getElementById("hero-pill-hours").innerHTML = `<i class="fa-regular fa-clock"></i> ${p.closed_days_text || '정상 진료'} (${p.open_time || '10:00'} ~ ${p.close_time || '18:00'})`;
+      }
+      document.getElementById("hours-weekday-text").textContent = `${p.open_time || '10:00'} ~ ${p.close_time || '18:00'}`;
+      document.getElementById("hours-weekend-text").textContent = p.weekend_open ? `${p.open_time || '10:00'} ~ ${p.close_time || '18:00'} (주말 정상진료)` : "주말 휴진";
+      document.getElementById("hours-lunch-text").textContent = `${p.lunch_start || '12:00'} ~ ${p.lunch_end || '13:30'}`;
+      document.getElementById("hours-closed-text").textContent = p.closed_days_text || "공지 참조";
+      if (p.notice_text) {
+        document.getElementById("hours-notice-text").innerHTML = `<strong><i class="fa-solid fa-circle-info"></i> 안내사항:</strong><br>${p.notice_text.replace(/\n/g, '<br>')}`;
+      }
+
+      // 3. Doctor & Specialties
+      document.getElementById("doctor-title-display").textContent = p.doctor_title || `${p.doctor_name} 원장`;
+      document.getElementById("doctor-specialty-display").textContent = p.specialty || "소아청소년과 전문의";
+      if (p.doctor_bio) {
+        document.getElementById("doctor-bio-display").textContent = `"${p.doctor_bio}"`;
+      }
+      if (Array.isArray(p.specialties) && p.specialties.length > 0) {
+        const container = document.getElementById("specialties-container");
+        container.innerHTML = p.specialties.map(s => `<span class="specialty-pill">${s}</span>`).join("");
+      }
+
+      // 4. Location & Map
+      document.getElementById("display-address").textContent = p.address || "경기 수원시 팔달구 (매교역 2번 출구)";
+      document.getElementById("display-directions").textContent = p.directions || "수인분당선 매교역 2번 출구 바로 앞";
+      document.getElementById("display-phone").textContent = p.phone || "031-234-5678";
+      
+      const mapBtn = document.getElementById("btn-naver-map");
+      if (p.map_url) {
+        mapBtn.href = p.map_url;
+        mapBtn.style.display = "inline-flex";
+      }
+
+      // 5. Footer meta info
+      document.getElementById("footer-meta-info").textContent = 
+        `요양기관기호: ${p.clinic_insucode || '41334655'} | 진료과목: ${p.dept_name || '소아청소년과'} | 원장: ${p.doctor_name || '김기중'} | 위치: ${p.address || '경기 수원시 팔달구'}`;
+    }
+
+    // Modal Control
+    function openAdminModal() {
+      populateForm(currentProfile);
+      document.getElementById("admin-modal-backdrop").classList.add("active");
+    }
+
+    function closeAdminModal() {
+      document.getElementById("admin-modal-backdrop").classList.remove("active");
+    }
+
+    function switchTab(tabName, btn) {
+      document.querySelectorAll(".modal-tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+
+      btn.classList.add("active");
+      const targetPanel = document.getElementById(`tab-panel-${tabName}`);
+      if (targetPanel) targetPanel.classList.add("active");
+    }
+
+    function populateForm(p) {
+      document.getElementById("input-clinic-name").value = p.clinic_name || "";
+      document.getElementById("input-clinic-en").value = p.clinic_name_en || "";
+      document.getElementById("input-insucode").value = p.clinic_insucode || "";
+      document.getElementById("input-phone").value = p.phone || "";
+      document.getElementById("input-doctor-name").value = p.doctor_name || "";
+      document.getElementById("input-doctor-title").value = p.doctor_title || "";
+      document.getElementById("input-specialty").value = p.specialty || "";
+      document.getElementById("input-dept-name").value = p.dept_name || "";
+
+      document.getElementById("input-address").value = p.address || "";
+      document.getElementById("input-directions").value = p.directions || "";
+      document.getElementById("input-map-url").value = p.map_url || "";
+      updateTestMapBtn(p.map_url || "");
+
+      document.getElementById("input-open-time").value = p.open_time || "10:00";
+      document.getElementById("input-close-time").value = p.close_time || "18:00";
+      document.getElementById("input-lunch-start").value = p.lunch_start || "12:00";
+      document.getElementById("input-lunch-end").value = p.lunch_end || "13:30";
+      document.getElementById("input-closed-text").value = p.closed_days_text || "";
+      document.getElementById("input-hours-text").value = p.hours_text || "";
+      document.getElementById("input-notice-text").value = p.notice_text || "";
+
+      document.getElementById("input-doctor-bio").value = p.doctor_bio || "";
+      document.getElementById("input-specialties").value = Array.isArray(p.specialties) ? p.specialties.join(", ") : "";
+
+      // Weekdays checkboxes
+      const closedDays = Array.isArray(p.closed_weekdays) ? p.closed_weekdays : [1, 2];
+      for (let i = 0; i < 7; i++) {
+        const chk = document.querySelector(`input[name="closed_weekday"][value="${i}"]`);
+        const lbl = document.getElementById(`lbl-day-${i}`);
+        if (chk && lbl) {
+          const isClosed = closedDays.includes(i);
+          chk.checked = isClosed;
+          lbl.classList.toggle("closed", isClosed);
+        }
+      }
+    }
+
+    function updateTestMapBtn(url) {
+      const btn = document.getElementById("btn-test-map-url");
+      if (url && (url.startsWith("http://") || url.startsWith("https://"))) {
+        btn.href = url;
+        btn.style.display = "inline-flex";
+      } else {
+        btn.style.display = "none";
+      }
+    }
+
+    document.getElementById("input-map-url").addEventListener("input", (e) => {
+      updateTestMapBtn(e.target.value.trim());
+    });
+
+    // Weekday toggle click handler
+    document.querySelectorAll(".weekday-btn").forEach(lbl => {
+      lbl.addEventListener("click", () => {
+        setTimeout(() => {
+          const chk = lbl.querySelector('input[type="checkbox"]');
+          lbl.classList.toggle("closed", chk.checked);
+        }, 10);
+      });
+    });
+
+    async function saveClinicProfile() {
+      const form = document.getElementById("clinic-info-form");
+      const name = document.getElementById("input-clinic-name").value.trim();
+      const addr = document.getElementById("input-address").value.trim();
+
+      if (!name) {
+        alert("병원명을 입력해주세요.");
+        return;
+      }
+
+      // Collect closed weekdays
+      const closed_weekdays = [];
+      document.querySelectorAll('input[name="closed_weekday"]:checked').forEach(c => {
+        closed_weekdays.push(parseInt(c.value, 10));
+      });
+
+      // Collect specialties array
+      const rawSpecialties = document.getElementById("input-specialties").value;
+      const specialties = rawSpecialties.split(/[,;\n]/).map(s => s.trim()).filter(Boolean);
+
+      const payload = {
+        clinic_name: name,
+        clinic_name_en: document.getElementById("input-clinic-en").value.trim(),
+        clinic_insucode: document.getElementById("input-insucode").value.trim(),
+        phone: document.getElementById("input-phone").value.trim(),
+        doctor_name: document.getElementById("input-doctor-name").value.trim(),
+        doctor_title: document.getElementById("input-doctor-title").value.trim(),
+        specialty: document.getElementById("input-specialty").value.trim(),
+        dept_name: document.getElementById("input-dept-name").value.trim(),
+
+        address: addr,
+        directions: document.getElementById("input-directions").value.trim(),
+        map_url: document.getElementById("input-map-url").value.trim(),
+
+        open_time: document.getElementById("input-open-time").value,
+        close_time: document.getElementById("input-close-time").value,
+        lunch_start: document.getElementById("input-lunch-start").value,
+        lunch_end: document.getElementById("input-lunch-end").value,
+        closed_weekdays: closed_weekdays,
+        closed_days_text: document.getElementById("input-closed-text").value.trim(),
+        hours_text: document.getElementById("input-hours-text").value.trim(),
+        notice_text: document.getElementById("input-notice-text").value.trim(),
+
+        doctor_bio: document.getElementById("input-doctor-bio").value.trim(),
+        specialties: specialties
+      };
+
+      try {
+        const res = await fetch("/api/clinic/info", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "저장에 실패했습니다.");
+        }
+
+        const resData = await res.json();
+        currentProfile = resData.data;
+        renderClinicProfile(currentProfile);
+        closeAdminModal();
+        showToast("병원 정보가 성공적으로 업데이트되었습니다!");
+        updateClinicStatus();
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    async function confirmResetDefaults() {
+      if (confirm("정말로 모든 병원 정보를 기본값(김기중 소아청소년과의원)으로 초기화하시겠습니까?")) {
+        try {
+          const res = await fetch("/api/clinic/info/reset", { method: "POST" });
+          if (!res.ok) throw new Error("초기화 실패");
+          const data = await res.json();
+          currentProfile = data.data;
+          renderClinicProfile(currentProfile);
+          populateForm(currentProfile);
+          closeAdminModal();
+          showToast("기본 설정으로 초기화되었습니다.");
+          updateClinicStatus();
+        } catch (err) {
+          showToast(err.message, true);
+        }
+      }
+    }
+
+    // Real-time Status Badge Check
+    async function updateClinicStatus() {
+      const badge = document.getElementById("clinic-status-badge");
+      const text = document.getElementById("clinic-status-text");
+
+      try {
+        const res = await fetch("/api/clinic/status");
+        if (res.ok) {
+          const status = await res.json();
+          badge.className = "clinic-status-badge";
+
+          if (status.can_checkin) {
+            badge.classList.add("open");
+            text.textContent = "현재 정상 진료 중";
+          } else if (status.is_lunch_time || (status.message && status.message.includes("점심시간"))) {
+            badge.classList.add("lunch");
+            text.textContent = "현재 점심시간 (12:00 ~ 13:30)";
+          } else if (status.reason === "CLOSED_DAY" || (status.message && status.message.includes("휴진"))) {
+            badge.classList.add("closed");
+            text.textContent = status.clinic_hours_text || "정기 휴진일";
+          } else if (status.reason === "SERVER_STOPPED") {
+            badge.classList.add("closed");
+            text.textContent = "진료 준비 중";
+          } else {
+            badge.classList.add("closed");
+            text.textContent = "진료 마감";
+          }
+        }
+      } catch (err) {
+        console.warn("[Clinic Status] Failed to fetch status:", err);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadClinicProfile();
+      updateClinicStatus();
+      setInterval(updateClinicStatus, 30000);
+    });
+  </script>
+</body>
+</html>

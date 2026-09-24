@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>진료 대기 안내</title>
+    <!-- Fonts matching other UIs -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="signage-app">
+        <!-- Top Header Banner -->
+        <header class="signage-header">
+            <h1>진료 대기 안내</h1>
+            <div class="header-right">
+                <div id="current-date" class="date-display">--년 --월 --일</div>
+                <div id="current-time" class="time-display">--:--:--</div>
+            </div>
+        </header>
+
+        <!-- Main Display Content Grid -->
+        <main class="signage-main">
+            <!-- Column 1: Current Treatment -->
+            <div class="signage-card card-treating">
+                <div class="card-header">
+                    <h2>현재 진료 중</h2>
+                </div>
+                <div class="card-body">
+                    <div id="treating-name" class="patient-name">진료 준비 중</div>
+                    <div id="treating-room" class="room-name">제1진료실</div>
+                </div>
+            </div>
+
+            <!-- Column 2: Next Patient -->
+            <div class="signage-card card-next">
+                <div class="card-header">
+                    <h2>다음 고객</h2>
+                </div>
+                <div class="card-body">
+                    <div id="next-name" class="patient-name">대기 없음</div>
+                    <div id="next-room" class="room-name">제1진료실</div>
+                </div>
+            </div>
+
+            <!-- Column 3: Waiting List -->
+            <div class="signage-card card-waiting-list">
+                <div class="card-header">
+                    <h2>대기 고객</h2>
+                </div>
+                <div class="card-body">
+                    <ul id="waiting-patients-list" class="waiting-list">
+                        <li class="empty-list">대기 중인 고객이 없습니다.</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer Banner & Legends -->
+        <footer class="signage-footer">
+            <div class="footer-ticker">
+                <div class="ticker-content">
+                    <span>잠시 후 이름이 불리면 진료실로 입장해 주세요.</span>
+                    <span>&bull;</span>
+                    <span>개인정보 보호를 위해 환자 성함의 일부는 마스킹 처리되어 표시됩니다.</span>
+                </div>
+            </div>
+            
+            <div class="theme-selector" style="display: flex; gap: 0.6rem; margin-right: 1.5rem; border-right: 1px solid var(--glass-border); padding-right: 1.5rem; align-items: center;">
+                <button class="theme-btn btn-light" data-theme="light" title="밝은 테마" style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff; background: #f8fafc; cursor: pointer; padding: 0; box-shadow: 0 0 4px rgba(0,0,0,0.2);"></button>
+                <button class="theme-btn btn-warm" data-theme="warm" title="따뜻한 테마" style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff; background: #faf3eb; cursor: pointer; padding: 0; box-shadow: 0 0 4px rgba(0,0,0,0.2);"></button>
+            </div>
+            
+            <div class="room-legends">
+                <span class="legend-badge badge-room1">1번 진료실</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Gateway Config & Logic Scripts -->
+    <script src="/config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

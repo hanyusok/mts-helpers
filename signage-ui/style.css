@@ -1,0 +1,358 @@
+:root {
+    --primary-color: #3b82f6;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --purple-color: #8b5cf6;
+}
+
+body {
+    /* Default: Light Theme */
+    --bg-color: #f8fafc;
+    --text-color: #0f172a;
+    --text-muted: #64748b;
+    
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(15, 23, 42, 0.08);
+    --glass-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.05);
+    --radial-bg: radial-gradient(circle at 50% 50%, #ffffff 0%, #f1f5f9 100%);
+    --ticker-bg: #1e3a8a;
+    --waiting-item-bg: rgba(15, 23, 42, 0.02);
+    --waiting-item-border: rgba(15, 23, 42, 0.05);
+}
+
+body.theme-warm {
+    /* Warm Cream Theme */
+    --bg-color: #fefcfb;
+    --text-color: #2b221a;
+    --text-muted: #7c6f62;
+    
+    --glass-bg: rgba(255, 255, 255, 0.9);
+    --glass-border: rgba(43, 34, 26, 0.08);
+    --glass-shadow: 0 10px 25px -5px rgba(43, 34, 26, 0.08), 0 8px 10px -6px rgba(43, 34, 26, 0.04);
+    --radial-bg: radial-gradient(circle at 50% 50%, #fffbf7 0%, #faf3eb 100%);
+    --ticker-bg: #7c2d12;
+    --waiting-item-bg: rgba(43, 34, 26, 0.02);
+    --waiting-item-border: rgba(43, 34, 26, 0.05);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+    background-color: var(--bg-color);
+    background-image: var(--radial-bg);
+    color: var(--text-color);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+#signage-app {
+    width: 100%;
+    height: 100vh;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    box-sizing: border-box;
+}
+
+/* Header styling */
+.signage-header {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--glass-shadow);
+}
+
+.signage-header h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    background: linear-gradient(to right, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.header-right {
+    display: flex;
+    align-items: baseline;
+    gap: 1.5rem;
+}
+
+.date-display {
+    font-size: 1.3rem;
+    color: var(--text-muted);
+}
+
+.time-display {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #60a5fa;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Main content grid styling (3 columns) */
+.signage-main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.2fr;
+    gap: 1.5rem;
+    height: 0; /* allows grid items to scroll internally if they overflow */
+}
+
+.signage-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: var(--glass-shadow);
+}
+
+.signage-card .card-header {
+    padding: 1.25rem;
+    text-align: center;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.signage-card .card-header h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+.signage-card .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+/* Column 1: Treating Patient (Green Theme) */
+.card-treating {
+    border-top: 6px solid var(--success-color);
+}
+
+.card-treating .card-header {
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.card-treating .card-header h2 {
+    color: var(--success-color);
+}
+
+.card-treating .patient-name {
+    color: var(--success-color);
+    text-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+}
+
+/* Column 2: Next Patient (Orange Theme) */
+.card-next {
+    border-top: 6px solid var(--warning-color);
+}
+
+.card-next .card-header {
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.card-next .card-header h2 {
+    color: var(--warning-color);
+}
+
+.card-next .patient-name {
+    color: var(--warning-color);
+    text-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+}
+
+/* Column 3: Waiting List (Blue Theme) */
+.card-waiting-list {
+    border-top: 6px solid var(--primary-color);
+}
+
+.card-waiting-list .card-header {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.card-waiting-list .card-header h2 {
+    color: var(--primary-color);
+}
+
+.card-waiting-list .card-body {
+    display: block;
+    overflow-y: auto;
+    padding: 1.5rem;
+    align-items: stretch;
+}
+
+/* Shared Patient Details Styles */
+.patient-name {
+    font-size: min(7vw, 13vh);
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    line-height: 1.1;
+    word-break: keep-all;
+}
+
+.room-name {
+    font-size: min(2vw, 3.8vh);
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-top: 0.5rem;
+}
+
+/* General Queue List Styles */
+.waiting-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.waiting-list li {
+    background: var(--waiting-item-bg);
+    border: 1px solid var(--waiting-item-border);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.waiting-list li::before {
+    content: "•";
+    color: var(--primary-color);
+    margin-right: 0.75rem;
+    font-size: 1.8rem;
+    line-height: 0;
+}
+
+.waiting-list li .patient-item-left {
+    display: flex;
+    align-items: center;
+}
+
+.waiting-list li .wait-number {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.08);
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    margin-right: 1rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.waiting-list li .wait-room {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.waiting-list li.empty-list {
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-weight: 400;
+    font-size: 1.2rem;
+    padding-top: 4rem;
+}
+
+.waiting-list li.empty-list::before {
+    display: none;
+}
+
+/* Footer layout (Ticker marquee and room badges) */
+.signage-footer {
+    height: 70px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 0 2rem;
+    overflow: hidden;
+    box-shadow: var(--glass-shadow);
+}
+
+.footer-ticker {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    padding-right: 2rem;
+}
+
+.ticker-content {
+    display: inline-block;
+    padding-left: 100%;
+    animation: ticker 25s linear infinite;
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--ticker-bg);
+}
+
+.ticker-content span {
+    margin-right: 2rem;
+}
+
+@keyframes ticker {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-100%, 0, 0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Room legends style matching the color badges */
+.room-legends {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.legend-badge {
+    padding: 0.4rem 1rem;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: white;
+}
+
+.badge-room1 {
+    background: var(--success-color);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+.badge-room2 {
+    background: var(--warning-color);
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+}
+
+.badge-room3 {
+    background: var(--purple-color);
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+}
