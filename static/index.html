@@ -10,7 +10,7 @@
   <!-- FontAwesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
-  <link rel="stylesheet" href="/static/styles.css?v=2">
+  <link rel="stylesheet" href="/static/styles.css?v=3">
   <!-- Dynamic Port Config -->
   <script src="/config.js"></script>
 </head>
@@ -29,6 +29,26 @@
         </div>
       </div>
 
+      <!-- Header Navigation Links -->
+      <nav class="header-nav">
+        <a href="/quick/" class="header-nav-link">
+          <i class="fa-solid fa-mobile-screen-button"></i>
+          <span>모바일 접수</span>
+        </a>
+        <a href="/kiosk/" class="header-nav-link highlight-kiosk">
+          <i class="fa-solid fa-tablet-screen-button"></i>
+          <span>무인 키오스크</span>
+        </a>
+        <a href="/quicklist/" class="header-nav-link">
+          <i class="fa-solid fa-users-viewfinder"></i>
+          <span>실시간 대기열</span>
+        </a>
+        <a href="/signage/" class="header-nav-link">
+          <i class="fa-solid fa-tv"></i>
+          <span>대기실 전광판</span>
+        </a>
+      </nav>
+
       <!-- Actions Group (Status Badge + Admin Edit Button) -->
       <div class="header-actions-group">
         <div class="status-badge-container">
@@ -45,6 +65,26 @@
     </div>
   </header>
 
+  <!-- Mobile Quick Sub-Nav Bar -->
+  <nav class="mobile-sub-nav">
+    <a href="/quick/" class="m-nav-tab">
+      <i class="fa-solid fa-mobile-screen-button"></i>
+      <span>모바일 접수</span>
+    </a>
+    <a href="/kiosk/" class="m-nav-tab active-kiosk">
+      <i class="fa-solid fa-tablet-screen-button"></i>
+      <span>무인 키오스크</span>
+    </a>
+    <a href="/quicklist/" class="m-nav-tab">
+      <i class="fa-solid fa-users-viewfinder"></i>
+      <span>실시간 대기열</span>
+    </a>
+    <a href="/signage/" class="m-nav-tab">
+      <i class="fa-solid fa-tv"></i>
+      <span>대기실 전광판</span>
+    </a>
+  </nav>
+
   <!-- Hero Section -->
   <section class="hero">
     <div class="container">
@@ -59,7 +99,19 @@
         스마트폰으로 간편하게 진료를 접수하고 실시간 대기 순번을 확인하세요. 환자와 보호자분의 소중한 시간을 아껴드립니다.
       </p>
 
-      <!-- 3 Core Service Cards -->
+      <!-- Hero Quick Action Buttons -->
+      <div class="hero-quick-buttons">
+        <a href="/quick/" class="hero-btn btn-primary-quick">
+          <i class="fa-solid fa-mobile-screen-button"></i>
+          <span>스마트폰 모바일 접수</span>
+        </a>
+        <a href="/kiosk/" class="hero-btn btn-kiosk-quick">
+          <i class="fa-solid fa-tablet-screen-button"></i>
+          <span>원내 무인 키오스크 접수</span>
+        </a>
+      </div>
+
+      <!-- 4 Core Service Cards -->
       <div class="services-grid">
         <!-- 1. Quick Check-in -->
         <a href="/quick/" class="service-card card-quick">
@@ -79,7 +131,25 @@
           </div>
         </a>
 
-        <!-- 2. Real-time Waitlist -->
+        <!-- 2. Kiosk Self Check-in -->
+        <a href="/kiosk/" class="service-card card-kiosk">
+          <div>
+            <div class="card-top">
+              <div class="card-icon">
+                <i class="fa-solid fa-tablet-screen-button"></i>
+              </div>
+              <span class="badge-tag">KIOSK</span>
+            </div>
+            <h3>무인 키오스크 접수</h3>
+            <p>원내 비치된 태블릿 또는 터치 키오스크 기기에서 이름과 생년월일을 입력하여 간편하게 접수합니다.</p>
+          </div>
+          <div class="card-action">
+            <span>키오스크 열기</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </a>
+
+        <!-- 3. Real-time Waitlist -->
         <a href="/quicklist/" class="service-card card-quicklist">
           <div>
             <div class="card-top">
@@ -97,7 +167,7 @@
           </div>
         </a>
 
-        <!-- 3. Waiting Room Signage -->
+        <!-- 4. Waiting Room Signage -->
         <a href="/signage/" class="service-card card-signage">
           <div>
             <div class="card-top">
@@ -159,16 +229,18 @@
         <div class="section-tag"><i class="fa-solid fa-user-doctor"></i> Medical Staff</div>
         <h3 class="section-title">의료진 소개</h3>
 
-        <div class="doctor-profile" style="margin-top: 1rem;">
-          <div class="doctor-avatar">
-            <i class="fa-solid fa-user-doctor"></i>
-          </div>
-          <div class="doctor-info">
-            <h4 id="doctor-title-display">김기중 원장</h4>
-            <div class="doctor-specialty" id="doctor-specialty-display">소아청소년과 전문의</div>
-            <p class="doctor-bio" id="doctor-bio-display">
-              "아이들의 건강한 성장과 밝은 미소를 위해 따뜻하고 세심하게 진료합니다. 우리 아이의 평생 주치의가 되어드리겠습니다."
-            </p>
+        <div id="doctor-profiles-wrapper" style="margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+          <div class="doctor-profile">
+            <div class="doctor-avatar">
+              <i class="fa-solid fa-user-doctor"></i>
+            </div>
+            <div class="doctor-info">
+              <h4 id="doctor-title-display">김기중 대표원장</h4>
+              <div class="doctor-specialty" id="doctor-specialty-display">소아청소년과 전문의</div>
+              <p class="doctor-bio" id="doctor-bio-display">
+                "아이들의 건강한 성장과 밝은 미소를 위해 따뜻하고 세심하게 진료합니다. 우리 아이의 평생 주치의가 되어드리겠습니다."
+              </p>
+            </div>
           </div>
         </div>
 
@@ -268,6 +340,7 @@
         <div class="footer-brand" id="footer-clinic-name">김기중 소아청소년과의원</div>
         <div class="footer-links">
           <a href="/quick/">모바일 접수</a>
+          <a href="/kiosk/">무인 키오스크</a>
           <a href="/quicklist/">실시간 대기열</a>
           <a href="/signage/">대기실 전광판</a>
           <a href="/admin/" style="color: var(--primary); font-weight: 600;"><i class="fa-solid fa-gear"></i> 병원 정보 관리</a>
@@ -526,11 +599,45 @@
       }
 
       // 3. Doctor & Specialties
-      document.getElementById("doctor-title-display").textContent = p.doctor_title || `${p.doctor_name} 원장`;
-      document.getElementById("doctor-specialty-display").textContent = p.specialty || "소아청소년과 전문의";
-      if (p.doctor_bio) {
-        document.getElementById("doctor-bio-display").textContent = `"${p.doctor_bio}"`;
+      const doctorsWrapper = document.getElementById("doctor-profiles-wrapper");
+      const activeDoctors = Array.isArray(p.doctors) && p.doctors.length > 0 
+        ? p.doctors.filter(d => d.active !== false)
+        : [{
+            room_code: "1",
+            room_name: "제1진료실",
+            doctor_name: p.doctor_name || "김기중",
+            doctor_title: p.doctor_title || "대표원장",
+            specialty: p.specialty || "소아청소년과 전문의",
+            bio: p.doctor_bio || "아이들의 건강한 성장과 밝은 미소를 위해 따뜻하고 세심하게 진료합니다."
+          }];
+
+      if (doctorsWrapper) {
+        doctorsWrapper.innerHTML = activeDoctors.map((doc, idx) => {
+          const roomCode = doc.room_code || "1";
+          const roomName = doc.room_name || `제${roomCode}진료실`;
+          const docTitle = doc.doctor_title ? `${doc.doctor_name} ${doc.doctor_title}` : `${doc.doctor_name} 원장`;
+          const spec = doc.specialty || p.specialty || "소아청소년과 전문의";
+          const bio = doc.bio || p.doctor_bio || "아이들의 건강한 성장과 밝은 미소를 위해 따뜻하고 세심하게 진료합니다.";
+          const isLast = idx === activeDoctors.length - 1;
+          
+          return `
+            <div class="doctor-profile" style="padding-bottom: ${isLast ? '0' : '0.85rem'}; border-bottom: ${isLast ? 'none' : '1px dashed var(--border)'};">
+              <div class="doctor-avatar">
+                <i class="fa-solid fa-user-doctor"></i>
+              </div>
+              <div class="doctor-info">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.2rem; flex-wrap: wrap;">
+                  <span class="specialty-pill" style="background: var(--primary-light); color: var(--primary); font-weight: 700; border-color: transparent;">${roomName}</span>
+                  <h4 style="margin: 0;">${docTitle}</h4>
+                </div>
+                <div class="doctor-specialty">${spec}</div>
+                <p class="doctor-bio" style="margin-bottom: 0;">"${bio}"</p>
+              </div>
+            </div>
+          `;
+        }).join("");
       }
+
       if (Array.isArray(p.specialties) && p.specialties.length > 0) {
         const container = document.getElementById("specialties-container");
         container.innerHTML = p.specialties.map(s => `<span class="specialty-pill">${s}</span>`).join("");

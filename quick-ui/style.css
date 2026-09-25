@@ -1024,3 +1024,56 @@ html, body {
 .btn-modal-close:active {
     transform: scale(0.98);
 }
+
+/* Quick Check-in Doctor Selection Chips */
+.doctor-chips-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+}
+@media (max-width: 480px) {
+    .doctor-chips-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.doctor-chip-card {
+    display: flex;
+    flex-direction: column;
+    padding: 0.75rem 0.85rem;
+    border: 2px solid var(--border-color, #e2e8f0);
+    border-radius: var(--radius-md, 12px);
+    background: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
+    text-align: left;
+}
+.doctor-chip-card:hover {
+    border-color: var(--primary, #0d9488);
+    background: #f0fdfa;
+}
+.doctor-chip-card.selected {
+    border-color: var(--primary, #0d9488);
+    background: #f0fdfa;
+    box-shadow: 0 0 0 1px var(--primary, #0d9488);
+}
+.doctor-chip-card input[type="radio"] {
+    display: none;
+}
+.doctor-chip-card .chip-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-main, #0f172a);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+.doctor-chip-card.selected .chip-title {
+    color: var(--primary, #0d9488);
+}
+.doctor-chip-card .chip-sub {
+    font-size: 0.74rem;
+    color: var(--text-muted, #64748b);
+    margin-top: 0.2rem;
+}

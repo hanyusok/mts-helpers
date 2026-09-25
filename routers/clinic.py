@@ -79,7 +79,8 @@ def get_clinic_status():
             "message": "진료실 원격 서버가 종료(Stop)되어 있거나 진료시간이 아닙니다. 진료시간 외에는 모바일 접수가 불가합니다.",
             "clinic_hours_text": clinic_hours_text,
             "current_time": current_time,
-            "is_lunch_time": False
+            "is_lunch_time": False,
+            "doctors": [d for d in info.get("doctors", []) if d.get("active", True)]
         }
 
     is_closed_day = current_weekday in clinic_closed_weekdays
@@ -132,5 +133,6 @@ def get_clinic_status():
         "message": message,
         "clinic_hours_text": clinic_hours_text,
         "current_time": current_time,
-        "is_lunch_time": is_lunch_time
+        "is_lunch_time": is_lunch_time,
+        "doctors": [d for d in info.get("doctors", []) if d.get("active", True)]
     }

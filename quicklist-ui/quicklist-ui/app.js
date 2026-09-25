@@ -2,9 +2,9 @@
 
 let GATEWAY_URL = "";
 if (window.location.protocol === 'file:') {
-    GATEWAY_URL = `http://127.0.0.1:${window.GATEWAY_PORT || 3010}`;
+    GATEWAY_URL = `http://127.0.0.1:${window.GATEWAY_PORT || 3001}`;
 } else if (window.location.port === '3007') {
-    GATEWAY_URL = `${window.location.protocol}//${window.location.hostname}:${window.GATEWAY_PORT || 3010}`;
+    GATEWAY_URL = `${window.location.protocol}//${window.location.hostname}:${window.GATEWAY_PORT || 3001}`;
 } else {
     GATEWAY_URL = window.location.origin;
 }
@@ -329,9 +329,9 @@ let ws;
 const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 let wsUrl = "";
 if (window.location.protocol === 'file:') {
-    wsUrl = `ws://127.0.0.1:${window.GATEWAY_PORT || 3010}/ws/customer`;
+    wsUrl = `ws://127.0.0.1:${window.GATEWAY_PORT || 3001}/ws/customer`;
 } else if (window.location.port === '3007') {
-    wsUrl = `${wsProtocol}//${window.location.hostname}:${window.GATEWAY_PORT || 3010}/ws/customer`;
+    wsUrl = `${wsProtocol}//${window.location.hostname}:${window.GATEWAY_PORT || 3001}/ws/customer`;
 } else {
     wsUrl = `${wsProtocol}//${window.location.host}/ws/customer`;
 }

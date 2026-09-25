@@ -1,0 +1,579 @@
+:root {
+    /* Google Material Design 3 Dark Theme Palette */
+    --md-sys-color-background: #121212;
+    --md-sys-color-surface: #1f1f23;
+    /* Surface Container */
+    --md-sys-color-outline: #8e918f;
+    /* M3 outline */
+    --md-sys-color-outline-variant: #444746;
+    /* M3 outline variant */
+    --md-sys-color-primary: #80deea;
+    /* Material Cyan / Accent */
+    --md-sys-color-on-primary: #00363a;
+    /* Dark Teal text for Cyan button */
+    --md-sys-color-primary-container: #004d40;
+    --md-sys-color-on-primary-container: #e0f2f1;
+    --md-sys-color-on-surface: #e2e3e2;
+    --md-sys-color-on-surface-variant: #c4c7c5;
+
+    --transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+    /* M3 standard deceleration curve */
+
+    /* Dimensions & Spacing Design Tokens */
+    --body-padding: 1.5rem 1rem;
+    --card-width: 450px;
+    --card-max-width: 95%;
+    --card-height: auto;
+    --card-max-height: none;
+    --card-padding: 2.5rem;
+    --card-radius: 28px;
+    /* M3 Extra Large shape */
+    --card-border: 1px solid var(--md-sys-color-outline-variant);
+    --card-bg: var(--md-sys-color-surface);
+
+    --logo-size: 3.5rem;
+    --logo-radius: 16px;
+    /* M3 Medium shape */
+    --logo-margin: 1.25rem;
+    --logo-icon-size: 2rem;
+
+    --title-size: 1.6rem;
+    --subtitle-size: 0.9rem;
+
+    --form-gap: 1.5rem;
+    --group-gap: 0.4rem;
+
+    --label-size: 0.85rem;
+    --label-spacing: 0.5px;
+
+    --input-padding: 1rem 1.25rem;
+    --input-size: 1.1rem;
+    --input-radius: 12px;
+
+    --btn-padding: 1rem 1.5rem;
+    --btn-size: 1.05rem;
+    --btn-radius: 100px;
+    /* M3 Fully Rounded shape (capsule) */
+    --btn-margin: 1.25rem;
+    --btn-gap: 0.75rem;
+
+    --status-padding: 1rem 1.25rem;
+    --status-size: 1rem;
+    --status-radius: 16px;
+    --status-margin: 1.25rem;
+
+    --spinner-size: 1.2rem;
+
+    --header-border: none;
+    --header-padding: 0;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+    background-color: var(--md-sys-color-background);
+    color: var(--md-sys-color-on-surface);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: var(--body-padding);
+}
+
+/* Material Card Container */
+.card {
+    background-color: var(--card-bg);
+    border: var(--card-border);
+    width: var(--card-width);
+    max-width: var(--card-max-width);
+    height: var(--card-height);
+    max-height: var(--card-max-height);
+    border-radius: var(--card-radius);
+    padding: var(--card-padding);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+    position: relative;
+    z-index: 10;
+    transition: var(--transition);
+}
+
+/* Logo / Header */
+.header {
+    text-align: center;
+    margin-bottom: var(--logo-margin);
+    border-right: var(--header-border);
+    padding-right: var(--header-padding);
+}
+
+.logo-icon {
+    width: var(--logo-size);
+    height: var(--logo-size);
+    background: var(--md-sys-color-primary-container);
+    border-radius: var(--logo-radius);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: var(--logo-margin);
+}
+
+.logo-icon svg {
+    width: var(--logo-icon-size);
+    height: var(--logo-icon-size);
+    fill: var(--md-sys-color-primary);
+}
+
+h1 {
+    font-size: var(--title-size);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--md-sys-color-on-surface);
+}
+
+.subtitle {
+    font-size: var(--subtitle-size);
+    color: var(--md-sys-color-on-surface-variant);
+    font-weight: 400;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: var(--form-gap);
+    display: flex;
+    flex-direction: column;
+    gap: var(--group-gap);
+}
+
+label {
+    font-size: var(--label-size);
+    font-weight: 500;
+    /* M3 Medium label */
+    color: var(--md-sys-color-on-surface-variant);
+    letter-spacing: var(--label-spacing);
+    padding-left: 0.25rem;
+}
+
+input {
+    width: 100%;
+    background: transparent;
+    border: 1.5px solid var(--md-sys-color-outline);
+    border-radius: var(--input-radius);
+    padding: var(--input-padding);
+    color: var(--md-sys-color-on-surface);
+    font-size: var(--input-size);
+    outline: none;
+    transition: var(--transition);
+    font-family: inherit;
+}
+
+input:focus {
+    border-color: var(--md-sys-color-primary);
+    border-width: 2px;
+    background: rgba(128, 222, 234, 0.04);
+    /* Subtle primary tint */
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.25);
+}
+
+/* Date input overrides */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+/* Button (Material Filled Button) */
+button {
+    width: 100%;
+    background: var(--md-sys-color-primary);
+    border: none;
+    color: var(--md-sys-color-on-primary);
+    font-size: var(--btn-size);
+    font-weight: 600;
+    padding: var(--btn-padding);
+    border-radius: var(--btn-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: var(--btn-margin);
+}
+
+button:hover {
+    background: #a0ecf4;
+    /* Lighter cyan focus */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+button:disabled {
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.38);
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Button Group & Outlined Button */
+.button-group {
+    display: flex;
+    gap: var(--btn-gap);
+    margin-top: var(--btn-margin);
+}
+
+.button-group button {
+    margin-top: 0;
+    flex: 1;
+}
+
+button.btn-secondary {
+    background: transparent;
+    border: 1.5px solid var(--md-sys-color-outline);
+    color: var(--md-sys-color-primary);
+}
+
+button.btn-secondary:hover {
+    background: rgba(128, 222, 234, 0.08);
+    border-color: var(--md-sys-color-primary);
+    box-shadow: none;
+}
+
+/* Status & Toast Messages */
+.status-box {
+    margin-top: var(--status-margin);
+    border-radius: var(--status-radius);
+    padding: var(--status-padding);
+    font-size: var(--status-size);
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    animation: fadeIn 0.3s ease;
+}
+
+.status-box.success {
+    display: flex;
+    background: #0f5223;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e8f7ed;
+}
+
+.status-box.error {
+    display: flex;
+    background: var(--md-sys-color-outline-variant);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #f87171;
+}
+
+.status-box.loading {
+    display: flex;
+    background: var(--md-sys-color-primary-container);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--md-sys-color-on-primary-container);
+}
+
+/* Spinner */
+.spinner {
+    width: var(--spinner-size);
+    height: var(--spinner-size);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* Keyframes */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Tablet portrait optimization (Android Kiosk / Tablet Devices) */
+@media (min-width: 600px) {
+    :root {
+        --card-width: 92vw;
+        --card-height: 90vh;
+        --card-max-width: 520px;
+        --card-max-height: 850px;
+        --card-padding: 3rem 2.5rem;
+        --card-radius: 28px;
+
+        --logo-size: 4.5rem;
+        --logo-radius: 18px;
+        --logo-margin: 1.25rem;
+        --logo-icon-size: 2.5rem;
+
+        --title-size: 2.2rem;
+        --subtitle-size: 1.1rem;
+        --label-size: 1.1rem;
+        --label-spacing: 0.8px;
+
+        --input-padding: 1.2rem 1.6rem;
+        --input-size: 1.4rem;
+        --input-radius: 16px;
+
+        --btn-padding: 1.2rem 1.8rem;
+        --btn-size: 1.4rem;
+        --btn-radius: 100px;
+        --btn-margin: 1.25rem;
+        --btn-gap: 1rem;
+
+        --status-padding: 1.2rem 1.5rem;
+        --status-size: 1.2rem;
+        --status-radius: 16px;
+        --status-margin: 1.5rem;
+
+        --spinner-size: 1.4rem;
+    }
+
+    .card {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+}
+
+/* Landscape-specific Tablet/Kiosk Adjustments */
+@media (min-width: 600px) and (orientation: landscape) {
+    :root {
+        --body-padding: 0.5rem;
+        --card-width: 96vw;
+        --card-height: 90vh;
+        --card-max-width: 940px;
+        --card-max-height: 600px;
+        --card-padding: 2.5rem 3.5rem;
+        --card-radius: 28px;
+
+        --logo-size: 4rem;
+        --logo-radius: 16px;
+        --logo-margin: 0.75rem;
+        --logo-icon-size: 2.25rem;
+
+        --title-size: 2rem;
+        --subtitle-size: 1.1rem;
+        --label-size: 1.1rem;
+        --label-spacing: 0.8px;
+
+        --input-padding: 1.1rem 1.5rem;
+        --input-size: 1.3rem;
+        --input-radius: 14px;
+
+        --btn-padding: 1.15rem;
+        --btn-size: 1.3rem;
+        --btn-radius: 100px;
+        --btn-margin: 0.5rem;
+        --btn-gap: 0.85rem;
+
+        --status-padding: 1rem 1.25rem;
+        --status-size: 1.1rem;
+        --status-radius: 16px;
+        --status-margin: 0;
+
+        --spinner-size: 1.2rem;
+
+        --header-border: 1px solid var(--md-sys-color-outline-variant);
+        --header-padding: 0 3.5rem 0 0;
+    }
+
+    .card {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        grid-template-rows: 1fr auto;
+        column-gap: 3.5rem;
+        row-gap: 0.5rem;
+        align-items: center;
+    }
+
+    .header {
+        grid-column: 1;
+        grid-row: 1;
+        text-align: left;
+        margin-bottom: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 100%;
+        border-right: var(--header-border);
+        padding-right: var(--header-padding);
+    }
+
+    #checkin-form {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 100%;
+        gap: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 0;
+        gap: 0.4rem;
+    }
+
+    .status-box {
+        grid-column: 1;
+        grid-row: 2;
+        margin-top: 0;
+    }
+}
+
+/* Specific optimizations for Galaxy Tab A7 Landscape and similar low-height viewports (height <= 640px) */
+@media (min-width: 600px) and (orientation: landscape) and (max-height: 640px) {
+    :root {
+        --body-padding: 0.25rem;
+        --card-max-height: 540px;
+        --card-padding: 1rem 2rem;
+
+        --logo-size: 3rem;
+        --logo-radius: 12px;
+        --logo-margin: 0.5rem;
+        --logo-icon-size: 1.75rem;
+
+        --title-size: 1.6rem;
+        --subtitle-size: 0.95rem;
+        --label-size: 0.95rem;
+        --label-spacing: 0.6px;
+
+        --input-padding: 0.95rem 1.3rem;
+        --input-size: 1.2rem;
+        --input-radius: 12px;
+
+        --btn-padding: 1.05rem;
+        --btn-size: 1.2rem;
+        --btn-radius: 100px;
+        --btn-margin: 0.4rem;
+        --btn-gap: 0.75rem;
+
+        --status-padding: 0.75rem 1.1rem;
+        --status-size: 1rem;
+        --status-radius: 12px;
+
+        --header-padding: 0 2rem 0 0;
+    }
+
+    #checkin-form {
+        gap: 0.75rem;
+    }
+
+    .form-group {
+        gap: 0.3rem;
+    }
+}
+
+/* High-Resolution Portrait Tablet Adjustments (e.g. 1200x2000 CSS viewports) */
+@media (min-width: 900px) and (orientation: portrait) {
+    :root {
+        --card-width: 80vw;
+        --card-height: 75vh;
+        --card-max-width: 1000px;
+        --card-max-height: 1500px;
+        --card-padding: 5rem 4rem;
+        --card-radius: 36px;
+
+        --logo-size: 7.5rem;
+        --logo-radius: 24px;
+        --logo-margin: 2.5rem;
+        --logo-icon-size: 4rem;
+
+        --title-size: 3rem;
+        --subtitle-size: 1.4rem;
+        --label-size: 1.3rem;
+        --label-spacing: 1px;
+
+        --input-padding: 1.5rem 2.2rem;
+        --input-size: 1.7rem;
+        --input-radius: 20px;
+
+        --btn-padding: 1.5rem;
+        --btn-size: 1.7rem;
+        --btn-radius: 100px;
+        --btn-margin: 2rem;
+        --btn-gap: 1.75rem;
+
+        --status-padding: 1.5rem 2rem;
+        --status-size: 1.5rem;
+        --status-radius: 20px;
+        --status-margin: 2.5rem;
+    }
+}
+
+/* High-Resolution Landscape Tablet/PC Adjustments (e.g., 2000x1200 CSS viewports) */
+@media (min-width: 2000px) and (min-height: 1200px) {
+    :root {
+        --body-padding: 1.5rem;
+
+        --card-width: 85vw;
+        --card-height: 80vh;
+        --card-max-width: 1600px;
+        --card-max-height: 980px;
+        --card-padding: 4rem 6rem;
+        --card-radius: 36px;
+
+        --logo-size: 6rem;
+        --logo-radius: 24px;
+        --logo-margin: 1.75rem;
+        --logo-icon-size: 3.25rem;
+
+        --title-size: 2.8rem;
+        --subtitle-size: 1.35rem;
+        --label-size: 1.25rem;
+        --label-spacing: 1px;
+
+        --input-padding: 1.4rem 2rem;
+        --input-size: 1.65rem;
+        --input-radius: 18px;
+
+        --btn-padding: 1.4rem;
+        --btn-size: 1.65rem;
+        --btn-radius: 100px;
+        --btn-margin: 1.25rem;
+        --btn-gap: 1.5rem;
+
+        --status-padding: 1.3rem 1.8rem;
+        --status-size: 1.3rem;
+        --status-radius: 20px;
+
+        --header-border: 1px solid var(--md-sys-color-outline-variant);
+        --header-padding: 0 5rem 0 0;
+    }
+
+    #checkin-form {
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        gap: 0.75rem;
+    }
+}

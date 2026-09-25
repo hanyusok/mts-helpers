@@ -1,12 +1,34 @@
 import os
 import json
 import logging
+from dotenv import load_dotenv
 
 logger = logging.getLogger("config")
 
-# Server Configurations
+# ==============================================================================
+# Environment Configuration (dev vs production)
+# ==============================================================================
+APP_ENV = os.getenv("APP_ENV", os.getenv("ENV", "development")).strip().lower()
+IS_DEV = APP_ENV in ("dev", "development", "local")
+IS_PROD = APP_ENV in ("prod", "production")
+
+# Load environment-specific .env file if available, otherwise fallback to .env
+project_root = os.path.dirname(os.path.abspath(__file__))
+env_file_specific = os.path.join(project_root, f".env.{APP_ENV}")
+env_file_default = os.path.join(project_root, ".env")
+
+if os.path.exists(env_file_specific):
+    load_dotenv(env_file_specific, override=False)
+    logger.info(f"Loaded environment config from {os.path.basename(env_file_specific)}")
+elif os.path.exists(env_file_default):
+    load_dotenv(env_file_default, override=False)
+    logger.info(f"Loaded default environment config from .env")
+
+# Server Configurations (Port default: 3001)
 HOST = os.getenv("EMR_GATEWAY_HOST", "0.0.0.0")
-PORT = int(os.getenv("EMR_GATEWAY_PORT", "3010"))
+PORT = int(os.getenv("EMR_GATEWAY_PORT", "3001"))
+RELOAD = os.getenv("EMR_RELOAD", "true" if IS_DEV else "false").strip().lower() in ("true", "1", "yes")
+LOG_LEVEL = os.getenv("EMR_LOG_LEVEL", "info" if IS_PROD else "debug").strip().lower()
 
 # Remote Firebird Database Configuration
 DB_HOST = os.getenv("EMR_DB_HOST", "192.168.0.12")  # EMR Doctor PC IP (e.g. DAVID)
@@ -22,19 +44,59 @@ DECRYPT_WORKER_NAME = "DecryptWorker.exe"
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 CLINIC_INFO_FILE = os.path.join(DATA_DIR, "clinic_info.json")
 
+DEFAULT_DOCTORS = [
+    {
+        "id": 1,
+        "room_code": 1,
+        "room_name": "제1진료실",
+        "doctor_name": "김기중",
+        "doctor_title": "김기중 대표원장",
+        "specialty": "소아청소년과 전문의",
+        "dept_code": "11",
+        "dept_name": "소아청소년과",
+        "doctor_code": "63221",
+        "active": True
+    },
+    {
+        "id": 2,
+        "room_code": 2,
+        "room_name": "제2진료실",
+        "doctor_name": "홍길동",
+        "doctor_title": "홍길동 원장",
+        "specialty": "소아청소년과 전문의",
+        "dept_code": "11",
+        "dept_name": "소아청소년과",
+        "doctor_code": "63222",
+        "active": True
+    },
+    {
+        "id": 3,
+        "room_code": 3,
+        "room_name": "제3진료실",
+        "doctor_name": "김갑순",
+        "doctor_title": "김갑순 원장",
+        "specialty": "소아청소년과 전문의",
+        "dept_code": "11",
+        "dept_name": "소아청소년과",
+        "doctor_code": "63223",
+        "active": True
+    }
+]
+
 # Default Clinic Profile
 DEFAULT_CLINIC_INFO = {
-    "clinic_name": "김기중 소아청소년과의원",
-    "clinic_name_en": "KIM KI JOONG PEDIATRICS",
+    "clinic_name": "매교아이 소아청소년과의원",
+    "clinic_name_en": "MAEGYO I PEDIATRICS",
     "clinic_insucode": "41334655",
     "doctor_name": "김기중",
-    "doctor_title": "김기중 원장",
+    "doctor_title": "김기중 대표원장",
     "specialty": "소아청소년과 전문의",
     "dept_code": "11",
     "dept_name": "소아청소년과",
     "room_code": 1,
     "room_name": "제1진료실",
     "doctor_code": "63221",
+    "doctors": DEFAULT_DOCTORS,
     "address": "경기 수원시 팔달구 (매교역 2번 출구)",
     "directions": "수인분당선 매교역 2번 출구 바로 앞",
     "map_url": "https://naver.me/GgUzsloE",
@@ -66,6 +128,8 @@ def load_clinic_info() -> dict:
             with open(CLINIC_INFO_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 merged = {**DEFAULT_CLINIC_INFO, **data}
+                if "doctors" not in merged or not merged["doctors"]:
+                    merged["doctors"] = list(DEFAULT_DOCTORS)
                 return merged
         except Exception as e:
             logger.warning(f"Failed to read clinic_info.json: {e}")
@@ -80,6 +144,15 @@ def save_clinic_info(info_dict: dict) -> dict:
     os.makedirs(DATA_DIR, exist_ok=True)
     current = load_clinic_info()
     current.update(info_dict)
+    doctors = current.get("doctors", [])
+    if doctors and isinstance(doctors, list):
+        primary = next((d for d in doctors if d.get("active", True)), doctors[0])
+        if primary:
+            current["doctor_name"] = primary.get("doctor_name", current.get("doctor_name"))
+            current["doctor_title"] = primary.get("doctor_title", current.get("doctor_title"))
+            current["room_name"] = primary.get("room_name", current.get("room_name"))
+            current["room_code"] = primary.get("room_code", current.get("room_code"))
+            current["doctor_code"] = primary.get("doctor_code", current.get("doctor_code"))
     with open(CLINIC_INFO_FILE, "w", encoding="utf-8") as f:
         json.dump(current, f, ensure_ascii=False, indent=2)
     _sync_module_variables(current)
@@ -90,6 +163,32 @@ def reset_clinic_info() -> dict:
 
 def get_clinic_info() -> dict:
     return load_clinic_info()
+
+def get_active_doctors() -> list:
+    info = load_clinic_info()
+    doctors = info.get("doctors", [])
+    active = [d for d in doctors if d.get("active", True)]
+    return active if active else list(DEFAULT_DOCTORS)
+
+def find_doctor_by_key(key: str) -> dict:
+    """Finds doctor by room_code, doctor_code, doctor_name, id, or room_name."""
+    if not key:
+        active = get_active_doctors()
+        return active[0] if active else DEFAULT_DOCTORS[0]
+    key_str = str(key).strip().lower()
+    for doc in get_active_doctors():
+        if (
+            str(doc.get("room_code", "")).lower() == key_str
+            or str(doc.get("doctor_code", "")).lower() == key_str
+            or str(doc.get("id", "")).lower() == key_str
+            or str(doc.get("doctor_name", "")).strip().lower() == key_str
+            or str(doc.get("room_name", "")).strip().lower() == key_str
+            or f"{doc.get('room_code', '')}번" in key_str
+            or f"제{doc.get('room_code', '')}" in key_str
+        ):
+            return doc
+    active = get_active_doctors()
+    return active[0] if active else DEFAULT_DOCTORS[0]
 
 # Synchronize module-level variables
 _info = load_clinic_info()

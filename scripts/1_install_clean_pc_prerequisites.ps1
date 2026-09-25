@@ -1,4 +1,4 @@
-﻿# ==============================================================================
+# ==============================================================================
 # 1_install_clean_pc_prerequisites.ps1
 # 김기중 소아청소년과의원 mts-helpers Clean PC 필수 유틸리티 무인 설치 스크립트
 # 관리자 권한(Run as Administrator)으로 실행해야 합니다.
@@ -111,18 +111,18 @@ if (Test-Path $localFbClient) {
     Write-Warning "  -> 프로젝트 폴더에 fbclient.dll이 없습니다. Firebird 드라이버가 필요합니다."
 }
 
-# 7. Windows 고급 방화벽 포트 3010(TCP) 인바운드 허용
-Write-Host "`n[5/5] Windows 방화벽 인바운드 규칙 등록 (포트 3010)..." -ForegroundColor Yellow
-$ruleName = "MTS_Helpers_Port_3010"
+# 7. Windows 고급 방화벽 포트 3001(TCP) 인바운드 허용
+Write-Host "`n[5/5] Windows 방화벽 인바운드 규칙 등록 (포트 3001)..." -ForegroundColor Yellow
+$ruleName = "MTS_Helpers_Port_3001"
 $existingRule = Get-NetFirewallRule -Name $ruleName -ErrorAction SilentlyContinue
 if (-not $existingRule) {
     New-NetFirewallRule -Name $ruleName `
-        -DisplayName "김기중 소아청소년과의원 모바일접수/대기열 (Port 3010)" `
+        -DisplayName "김기중 소아청소년과의원 모바일접수/대기열 (Port 3001)" `
         -Direction Inbound `
-        -LocalPort 3010 `
+        -LocalPort 3001 `
         -Protocol TCP `
         -Action Allow | Out-Null
-    Write-Host "  -> 방화벽 인바운드 포트 3010 허용 규칙 등록 완료!" -ForegroundColor Green
+    Write-Host "  -> 방화벽 인바운드 포트 3001 허용 규칙 등록 완료!" -ForegroundColor Green
 } else {
     Write-Host "  -> 방화벽 규칙 ($ruleName)이 이미 등록되어 있습니다." -ForegroundColor Green
 }

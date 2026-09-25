@@ -555,6 +555,107 @@
       background: #7f1d1d;
       border-left: 4px solid #ef4444;
     }
+
+    /* Multi-Doctor Management Styles */
+    .doctor-item-card {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      margin-bottom: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    .doctor-item-card.inactive {
+      background: #f1f5f9;
+      opacity: 0.75;
+      border-style: dashed;
+    }
+
+    .doctor-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.85rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    .doctor-item-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: 700;
+      font-size: 0.88rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      background: #e0e7ff;
+      color: #4338ca;
+    }
+
+    .doctor-item-badge.room-1 { background: #dcfce7; color: #15803d; }
+    .doctor-item-badge.room-2 { background: #e0f2fe; color: #0369a1; }
+    .doctor-item-badge.room-3 { background: #ede9fe; color: #6d28d9; }
+
+    .doctor-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-toggle-active {
+      padding: 0.35rem 0.8rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s;
+    }
+
+    .btn-toggle-active.on {
+      background: #dcfce7;
+      color: #15803d;
+      border-color: #86efac;
+    }
+
+    .btn-toggle-active.off {
+      background: #fee2e2;
+      color: #b91c1c;
+      border-color: #fca5a5;
+    }
+
+    .btn-del-doctor {
+      background: #ffffff;
+      color: #94a3b8;
+      border: 1px solid var(--border);
+      padding: 0.35rem 0.6rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.82rem;
+      transition: all 0.2s;
+    }
+
+    .btn-del-doctor:hover {
+      background: #fee2e2;
+      color: #ef4444;
+      border-color: #fca5a5;
+    }
+
+    .doctor-fields-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.2fr 1fr 0.9fr;
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 900px) {
+      .doctor-fields-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
   </style>
 </head>
 
@@ -580,6 +681,10 @@
       <a href="/quick/" class="menu-item" target="_blank">
         <i class="fa-solid fa-mobile-screen-button"></i>
         <span>모바일 간편 접수</span>
+      </a>
+      <a href="/kiosk/" class="menu-item" target="_blank">
+        <i class="fa-solid fa-tablet-screen-button"></i>
+        <span>무인 키오스크 접수</span>
       </a>
       <a href="/quicklist/" class="menu-item" target="_blank">
         <i class="fa-solid fa-users-viewfinder"></i>
@@ -633,6 +738,7 @@
             <span class="preview-pill"><i class="fa-regular fa-clock"></i> <span id="prev-hours">10:00 ~ 18:00 (화·수
                 휴진)</span></span>
           </div>
+          <div class="preview-badges" id="prev-doctors-badges" style="margin-top: 0.6rem;"></div>
         </div>
         <div>
           <a id="prev-map-btn" href="https://naver.me/GgUzsloE" target="_blank" class="btn-map-preview">
@@ -809,6 +915,28 @@
             <div class="hint">쉼표(,)로 구분하여 입력하시면 메인 페이지에 예쁜 뱃지 태그로 나열됩니다.</div>
           </div>
         </div>
+
+        <!-- 5. 진료실 및 의료진 관리 (다인 진료 체계 설정) -->
+        <div class="config-card" style="grid-column: 1 / -1;">
+          <div class="config-card-header" style="justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.65rem;">
+              <div class="header-icon" style="background:#e0e7ff; color:#4338ca;"><i class="fa-solid fa-user-doctor"></i></div>
+              <div>
+                <h3>5. 진료실 및 의료진 관리 (다인 진료 체계 설정)</h3>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.15rem;">
+                  개별 진료실(1진료실, 2진료실, 3진료실...)과 담당 원장님을 등록하고, 당일 진료/휴진 상태를 설정합니다.
+                </p>
+              </div>
+            </div>
+            <button type="button" class="btn-reset" onclick="addNewDoctorRow()" style="border-color: #6366f1; color: #4338ca; background: #eef2ff; font-weight: 700;">
+              <i class="fa-solid fa-user-plus"></i> 진료실/의사 추가
+            </button>
+          </div>
+
+          <div id="doctors-list-container">
+            <!-- Doctor items rendered dynamically -->
+          </div>
+        </div>
       </div>
     </main>
   </div>
@@ -821,6 +949,7 @@
 
   <script>
     let clinicData = {};
+    let currentDoctors = [];
 
     function showToast(msg, isError = false) {
       const toast = document.getElementById("toast");
@@ -845,6 +974,144 @@
       } catch (err) {
         showToast(err.message, true);
       }
+    }
+
+    function renderDoctorsList() {
+      const container = document.getElementById("doctors-list-container");
+      if (!container) return;
+
+      if (!currentDoctors || currentDoctors.length === 0) {
+        container.innerHTML = `<div style="padding:1.5rem; text-align:center; color:var(--text-muted);">등록된 진료실 및 의사가 없습니다. [진료실/의사 추가] 버튼을 클릭하세요.</div>`;
+        return;
+      }
+
+      container.innerHTML = currentDoctors.map((doc, idx) => {
+        const isActive = doc.active !== false;
+        const roomNum = doc.room_code || (idx + 1);
+        const roomBadgeClass = `room-${(roomNum % 3) || 3}`;
+
+        return `
+          <div class="doctor-item-card ${isActive ? '' : 'inactive'}" data-index="${idx}">
+            <div class="doctor-item-header">
+              <div style="display: flex; align-items: center; gap: 0.6rem;">
+                <span class="doctor-item-badge ${roomBadgeClass}">
+                  <i class="fa-solid fa-door-open"></i> ${doc.room_name || `제${roomNum}진료실`}
+                </span>
+                <strong style="font-size: 0.95rem; color: var(--text-main);">${doc.doctor_name || '원장 성명 미입력'}</strong>
+                <span style="font-size: 0.82rem; color: var(--text-muted);">${doc.doctor_title || '원장'}</span>
+              </div>
+              <div class="doctor-actions">
+                <button type="button" class="btn-toggle-active ${isActive ? 'on' : 'off'}" onclick="toggleDoctorActive(${idx})">
+                  <i class="fa-solid ${isActive ? 'fa-circle-check' : 'fa-circle-xmark'}"></i>
+                  <span>${isActive ? '오늘 진료 중' : '당일 휴진'}</span>
+                </button>
+                ${currentDoctors.length > 1 ? `
+                  <button type="button" class="btn-del-doctor" onclick="deleteDoctorRow(${idx})" title="진료실 삭제">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+
+            <div class="doctor-fields-grid">
+              <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:0.78rem;">진료실 번호/명칭</label>
+                <input type="text" class="form-control" style="font-size:0.85rem;" 
+                  value="${doc.room_name || `제${roomNum}진료실`}" 
+                  onchange="updateDoctorField(${idx}, 'room_name', this.value)" placeholder="제${roomNum}진료실">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:0.78rem;">의사 성명</label>
+                <input type="text" class="form-control" style="font-size:0.85rem;" 
+                  value="${doc.doctor_name || ''}" 
+                  onchange="updateDoctorField(${idx}, 'doctor_name', this.value)" placeholder="예: 홍길동">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:0.78rem;">직함 / 호칭</label>
+                <input type="text" class="form-control" style="font-size:0.85rem;" 
+                  value="${doc.doctor_title || '원장'}" 
+                  onchange="updateDoctorField(${idx}, 'doctor_title', this.value)" placeholder="예: 원장, 대표원장">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:0.78rem;">전문의 / 진료과</label>
+                <input type="text" class="form-control" style="font-size:0.85rem;" 
+                  value="${doc.specialty || '소아청소년과 전문의'}" 
+                  onchange="updateDoctorField(${idx}, 'specialty', this.value)" placeholder="소아청소년과 전문의">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:0.78rem;">EMR 코드</label>
+                <input type="text" class="form-control" style="font-size:0.85rem;" 
+                  value="${doc.doctor_code || ''}" 
+                  onchange="updateDoctorField(${idx}, 'doctor_code', this.value)" placeholder="6322${roomNum}">
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      updateDoctorPreview();
+    }
+
+    function updateDoctorField(idx, field, val) {
+      if (currentDoctors[idx]) {
+        currentDoctors[idx][field] = val;
+        updateDoctorPreview();
+      }
+    }
+
+    function toggleDoctorActive(idx) {
+      if (currentDoctors[idx]) {
+        currentDoctors[idx].active = !currentDoctors[idx].active;
+        renderDoctorsList();
+      }
+    }
+
+    function deleteDoctorRow(idx) {
+      if (currentDoctors.length <= 1) {
+        alert("최소 1개 이상의 진료실이 유지되어야 합니다.");
+        return;
+      }
+      if (confirm(`${currentDoctors[idx].doctor_name || '해당 진료실'}을 삭제하시겠습니까?`)) {
+        currentDoctors.splice(idx, 1);
+        renderDoctorsList();
+      }
+    }
+
+    function addNewDoctorRow() {
+      const nextRoom = currentDoctors.length + 1;
+      currentDoctors.push({
+        id: Date.now(),
+        room_code: nextRoom,
+        room_name: `제${nextRoom}진료실`,
+        doctor_name: "",
+        doctor_title: "원장",
+        specialty: "소아청소년과 전문의",
+        dept_code: "11",
+        dept_name: "소아청소년과",
+        doctor_code: `6322${nextRoom}`,
+        active: true
+      });
+      renderDoctorsList();
+    }
+
+    function updateDoctorPreview() {
+      const prevBadges = document.getElementById("prev-doctors-badges");
+      if (!prevBadges) return;
+
+      if (!currentDoctors || currentDoctors.length === 0) {
+        prevBadges.innerHTML = "";
+        return;
+      }
+
+      prevBadges.innerHTML = currentDoctors.map(d => {
+        const isActive = d.active !== false;
+        return `
+          <span class="preview-pill" style="background: ${isActive ? 'rgba(255,255,255,0.25)' : 'rgba(239, 68, 68, 0.4)'};">
+            <i class="fa-solid fa-user-doctor"></i>
+            ${d.room_name || `제${d.room_code}진료실`} ${d.doctor_name || '의사'} ${isActive ? '(진료중)' : '(휴진)'}
+          </span>
+        `;
+      }).join("");
     }
 
     function populateUI(d) {
@@ -899,6 +1166,16 @@
           lbl.classList.toggle("closed", isClosed);
         }
       }
+
+      // Doctors List
+      currentDoctors = Array.isArray(d.doctors) && d.doctors.length > 0 
+        ? JSON.parse(JSON.stringify(d.doctors))
+        : [
+            { id: 1, room_code: 1, room_name: "제1진료실", doctor_name: d.doctor_name || "김기중", doctor_title: d.doctor_title || "대표원장", specialty: d.specialty || "소아청소년과 전문의", dept_code: "11", dept_name: "소아청소년과", doctor_code: "63221", active: true },
+            { id: 2, room_code: 2, room_name: "제2진료실", doctor_name: "홍길동", doctor_title: "원장", specialty: "소아청소년과 전문의", dept_code: "11", dept_name: "소아청소년과", doctor_code: "63222", active: true },
+            { id: 3, room_code: 3, room_name: "제3진료실", doctor_name: "김갑순", doctor_title: "원장", specialty: "소아청소년과 전문의", dept_code: "11", dept_name: "소아청소년과", doctor_code: "63223", active: true }
+          ];
+      renderDoctorsList();
     }
 
     function updateTestMapBtn(url) {
@@ -965,8 +1242,17 @@
         notice_text: document.getElementById("adm-notice-text").value.trim(),
 
         doctor_bio: document.getElementById("adm-doctor-bio").value.trim(),
-        specialties: specialties
+        specialties: specialties,
+        doctors: currentDoctors
       };
+
+      if (currentDoctors.length > 0) {
+        const primary = currentDoctors.find(d => d.active) || currentDoctors[0];
+        if (primary && primary.doctor_name) {
+          payload.doctor_name = primary.doctor_name;
+          payload.doctor_title = primary.doctor_title;
+        }
+      }
 
       try {
         const res = await fetch("/api/clinic/info", {

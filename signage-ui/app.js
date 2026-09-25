@@ -99,12 +99,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Resolve EMR Gateway URL
     let GATEWAY_URL = "";
     if (window.location.protocol === 'file:') {
-        GATEWAY_URL = `http://127.0.0.1:${window.GATEWAY_PORT || 3010}`;
+        GATEWAY_URL = `http://127.0.0.1:${window.GATEWAY_PORT || 3001}`;
     } else if (window.location.port === '3007') {
-        GATEWAY_URL = `${window.location.protocol}//${window.location.hostname}:${window.GATEWAY_PORT || 3010}`;
+        GATEWAY_URL = `${window.location.protocol}//${window.location.hostname}:${window.GATEWAY_PORT || 3001}`;
     } else {
         GATEWAY_URL = window.location.origin;
     }
+
+    const signageMain = document.getElementById('signage-main');
 
     // 4. Fetch and Render EMR Waitlist Data
     async function loadSignageWaitlist() {
@@ -115,70 +117,200 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
             const queue = data.queue || [];
             
-            // Filter out completed treatments if they linger in the array
-            // (e.g. FIN == '*' means completed/settled)
+            // Filter out completed treatments if they linger in the array (fin == '*')
             const activeQueue = queue.filter(p => !p.fin || p.fin.trim() !== '*');
-            
-            // Rendering Column 1: 현재 진료 중 (Currently Treating)
-            if (activeQueue.length > 0) {
-                const treatingPatient = activeQueue[0];
-                treatingName.textContent = maskName(treatingPatient.pname || treatingPatient.pcode);
-                treatingName.classList.remove('no-data');
-                // Use patient room/gubun if defined, otherwise default to 제1진료실
-                treatingRoom.textContent = treatingPatient.room || "1번 진료실";
-            } else {
-                treatingName.textContent = "진료 준비 중";
-                treatingName.classList.add('no-data');
-                treatingRoom.textContent = "-";
-            }
-            
-            // Rendering Column 2: 다음 고객 (Next Patient)
-            if (activeQueue.length > 1) {
-                const nextPatient = activeQueue[1];
-                nextName.textContent = maskName(nextPatient.pname || nextPatient.pcode);
-                nextName.classList.remove('no-data');
-                nextRoom.textContent = nextPatient.room || "1번 진료실";
-            } else {
-                nextName.textContent = "대기 없음";
-                nextName.classList.add('no-data');
-                nextRoom.textContent = "-";
-            }
-            
-            // Rendering Column 3: 대기 고객 (Waiting List)
-            if (waitingListContainer) {
-                waitingListContainer.innerHTML = "";
-                
-                if (activeQueue.length > 2) {
-                    const generalQueue = activeQueue.slice(2);
-                    generalQueue.forEach((p, idx) => {
-                        const li = document.createElement('li');
-                        
-                        // Wait number index starts from 1 for the general list (which is actually position 3 onwards)
-                        const waitNum = idx + 1;
-                        const patientName = maskName(p.pname || p.pcode);
-                        const roomLabel = p.room || "1번 진료실";
-                        
-                        li.innerHTML = `
-                            <div class="patient-item-left">
-                                <span class="wait-number">${waitNum}</span>
-                                <span>${patientName}</span>
-                            </div>
-                            <span class="wait-room">${roomLabel}</span>
-                        `;
-                        waitingListContainer.appendChild(li);
-                    });
+            const doctors = (data.doctors && data.doctors.length > 0) ? data.doctors.filter(d => d.active !== false) : [];
+            const roomsSummary = data.rooms_summary || {};
+
+            // Update footer legends dynamically
+            const legendsContainer = document.querySelector('.room-legends');
+            if (legendsContainer) {
+                if (doctors.length > 0) {
+                    legendsContainer.innerHTML = doctors.map(d => {
+                        const code = d.room_code || '1';
+                        const roomName = d.room_name || `제${code}진료실`;
+                        const docName = d.doctor_name ? ` ${d.doctor_name}` : '';
+                        return `<span class="legend-badge badge-room${code}">${roomName}${docName}</span>`;
+                    }).join('');
                 } else {
-                    waitingListContainer.innerHTML = '<li class="empty-list">대기 중인 고객이 없습니다.</li>';
+                    legendsContainer.innerHTML = '<span class="legend-badge badge-room1">1번 진료실</span>';
                 }
+            }
+
+            // Decide layout: Multi-Room (>= 2 active doctors) vs Single Room
+            if (doctors.length > 1) {
+                renderMultiRoomBoard(doctors, roomsSummary, activeQueue);
+            } else {
+                renderSingleRoomBoard(doctors, activeQueue);
             }
         } catch (err) {
             console.error("Failed to load waitlist for signage:", err);
-            treatingName.textContent = "연결 오류";
-            nextName.textContent = "연결 오류";
-            if (waitingListContainer) {
-                waitingListContainer.innerHTML = '<li class="empty-list" style="color:red;">데이터를 가져오지 못했습니다.</li>';
+            if (signageMain) {
+                signageMain.innerHTML = `
+                    <div class="signage-card" style="grid-column: 1 / -1; justify-content: center; align-items: center; padding: 3rem;">
+                        <h2 style="color: #ef4444; margin-bottom: 1rem;"><i class="fa-solid fa-triangle-exclamation"></i> 연결 대기 중</h2>
+                        <p style="color: var(--text-muted); font-size: 1.2rem;">대기열 데이터를 불러오는 중입니다. 잠시만 기다려주세요.</p>
+                    </div>
+                `;
             }
         }
+    }
+
+    function renderMultiRoomBoard(doctors, roomsSummary, activeQueue) {
+        if (!signageMain) return;
+        signageMain.className = 'signage-main multi-room-mode';
+
+        const roomCountClass = `rooms-${Math.min(doctors.length, 3)}`;
+        let multiRoomsHtml = `<div class="multi-rooms-grid ${roomCountClass}">`;
+
+        doctors.forEach(doc => {
+            const code = doc.room_code || '1';
+            const roomName = doc.room_name || `제${code}진료실`;
+            const docName = doc.doctor_name || '';
+            const docTitle = doc.doctor_title || '원장';
+
+            const rSummary = roomsSummary[code] || { queue: [] };
+            const rQueue = (rSummary.queue || []).filter(p => !p.fin || p.fin.trim() !== '*');
+
+            const treating = rQueue.length > 0 ? maskName(rQueue[0].pname || rQueue[0].pcode) : null;
+            const next = rQueue.length > 1 ? maskName(rQueue[1].pname || rQueue[1].pcode) : null;
+            const waitCount = rQueue.length;
+
+            multiRoomsHtml += `
+                <div class="room-station-card room-border-${code}">
+                    <div class="room-station-header">
+                        <div class="room-station-title">
+                            <span class="room-badge-pill badge-room${code}">${roomName}</span>
+                            <span class="room-doctor-title">${docName} ${docTitle}</span>
+                        </div>
+                        <span class="room-wait-pill">대기 ${waitCount}명</span>
+                    </div>
+                    <div class="room-station-body">
+                        <div class="station-box station-box-treating">
+                            <div class="station-label">
+                                <i class="fa-solid fa-stethoscope"></i> 현재 진료
+                            </div>
+                            <div class="station-patient ${treating ? '' : 'empty'}">${treating || '진료 준비 중'}</div>
+                        </div>
+                        <div class="station-box station-box-next">
+                            <div class="station-label">
+                                <i class="fa-regular fa-clock"></i> 다음 순서
+                            </div>
+                            <div class="station-patient ${next ? '' : 'empty'}">${next || '대기 없음'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        multiRoomsHtml += `</div>`;
+
+        // Right side: unified waiting list
+        let waitListHtml = `
+            <div class="signage-card card-waiting-list">
+                <div class="card-header">
+                    <h2>대기 고객 (${activeQueue.length}명)</h2>
+                </div>
+                <div class="card-body">
+                    <ul class="waiting-list">
+        `;
+
+        if (activeQueue.length > 0) {
+            activeQueue.forEach((p, idx) => {
+                const waitNum = idx + 1;
+                const patientName = maskName(p.pname || p.pcode);
+                const roomCode = p.room_code || '1';
+                const roomLabel = p.room || `제${roomCode}진료실`;
+
+                waitListHtml += `
+                    <li>
+                        <div class="patient-item-left">
+                            <span class="wait-number">${waitNum}</span>
+                            <span>${patientName}</span>
+                        </div>
+                        <span class="badge-room badge-room${roomCode}">${roomLabel}</span>
+                    </li>
+                `;
+            });
+        } else {
+            waitListHtml += `<li class="empty-list">대기 중인 고객이 없습니다.</li>`;
+        }
+
+        waitListHtml += `
+                    </ul>
+                </div>
+            </div>
+        `;
+
+        signageMain.innerHTML = multiRoomsHtml + waitListHtml;
+    }
+
+    function renderSingleRoomBoard(doctors, activeQueue) {
+        if (!signageMain) return;
+        signageMain.className = 'signage-main';
+
+        const doc = doctors.length > 0 ? doctors[0] : { room_name: "제1진료실", doctor_name: "김기중" };
+        const roomName = doc.room_name || "제1진료실";
+
+        const treating = activeQueue.length > 0 ? maskName(activeQueue[0].pname || activeQueue[0].pcode) : null;
+        const next = activeQueue.length > 1 ? maskName(activeQueue[1].pname || activeQueue[1].pcode) : null;
+        const generalQueue = activeQueue.length > 2 ? activeQueue.slice(2) : [];
+
+        let queueItemsHtml = '';
+        if (generalQueue.length > 0) {
+            queueItemsHtml = generalQueue.map((p, idx) => {
+                const waitNum = idx + 1;
+                const patientName = maskName(p.pname || p.pcode);
+                const roomCode = p.room_code || '1';
+                const roomLabel = p.room || roomName;
+                return `
+                    <li>
+                        <div class="patient-item-left">
+                            <span class="wait-number">${waitNum}</span>
+                            <span>${patientName}</span>
+                        </div>
+                        <span class="wait-room">${roomLabel}</span>
+                    </li>
+                `;
+            }).join('');
+        } else {
+            queueItemsHtml = '<li class="empty-list">대기 중인 고객이 없습니다.</li>';
+        }
+
+        signageMain.innerHTML = `
+            <!-- Column 1: Current Treatment -->
+            <div class="signage-card card-treating">
+                <div class="card-header">
+                    <h2>현재 진료 중</h2>
+                </div>
+                <div class="card-body">
+                    <div class="patient-name ${treating ? '' : 'no-data'}">${treating || '진료 준비 중'}</div>
+                    <div class="room-name">${doc.doctor_name ? `${roomName} (${doc.doctor_name})` : roomName}</div>
+                </div>
+            </div>
+
+            <!-- Column 2: Next Patient -->
+            <div class="signage-card card-next">
+                <div class="card-header">
+                    <h2>다음 고객</h2>
+                </div>
+                <div class="card-body">
+                    <div class="patient-name ${next ? '' : 'no-data'}">${next || '대기 없음'}</div>
+                    <div class="room-name">${roomName}</div>
+                </div>
+            </div>
+
+            <!-- Column 3: Waiting List -->
+            <div class="signage-card card-waiting-list">
+                <div class="card-header">
+                    <h2>대기 고객 (${generalQueue.length}명)</h2>
+                </div>
+                <div class="card-body">
+                    <ul class="waiting-list">
+                        ${queueItemsHtml}
+                    </ul>
+                </div>
+            </div>
+        `;
     }
 
     // 5. Establish Real-time WebSocket Connection
@@ -186,9 +318,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     let wsUrl = "";
     if (window.location.protocol === 'file:') {
-        wsUrl = `ws://127.0.0.1:${window.GATEWAY_PORT || 3010}/ws/customer`;
+        wsUrl = `ws://127.0.0.1:${window.GATEWAY_PORT || 3001}/ws/customer`;
     } else if (window.location.port === '3007') {
-        wsUrl = `${wsProtocol}//${window.location.hostname}:${window.GATEWAY_PORT || 3010}/ws/customer`;
+        wsUrl = `${wsProtocol}//${window.location.hostname}:${window.GATEWAY_PORT || 3001}/ws/customer`;
     } else {
         wsUrl = `${wsProtocol}//${window.location.host}/ws/customer`;
     }

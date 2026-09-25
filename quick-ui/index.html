@@ -169,6 +169,20 @@
                         </div>
                     </div>
 
+                    <!-- Doctor / Room Selection Card -->
+                    <div class="input-card" id="quick-doctor-card">
+                        <label class="input-label">
+                            <i class="fa-solid fa-stethoscope"></i>
+                            <span>희망 진료실 / 담당 원장님 선택</span>
+                        </label>
+                        <div class="doctor-chips-grid" id="quick-doctor-chips">
+                            <div class="doctor-chip-card selected" onclick="selectQuickDoctor(this, null, null)">
+                                <div class="chip-title"><i class="fa-solid fa-bolt"></i> 빠른 진료</div>
+                                <div class="chip-sub">가장 빠른 진료실 자동 배정</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Error Alert Banner -->
                     <div id="error-banner" class="alert-banner error" style="display:none;">
                         <i class="fa-solid fa-triangle-exclamation"></i>
@@ -214,6 +228,10 @@
                         <div class="info-row">
                             <span class="info-label">생년월일</span>
                             <span class="info-value" id="res-patient-birth">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">배정 진료실</span>
+                            <span class="info-value" id="res-assigned-room" style="color:var(--primary); font-weight:700;">-</span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">접수 일시</span>

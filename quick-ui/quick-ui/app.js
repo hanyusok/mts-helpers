@@ -2,9 +2,9 @@
 
 let GATEWAY_URL = "";
 if (window.location.protocol === 'file:') {
-    GATEWAY_URL = `http://127.0.0.1:${window.GATEWAY_PORT || 3010}`;
+    GATEWAY_URL = `http://127.0.0.1:${window.GATEWAY_PORT || 3001}`;
 } else if (window.location.port === '3007') {
-    GATEWAY_URL = `${window.location.protocol}//${window.location.hostname}:${window.GATEWAY_PORT || 3010}`;
+    GATEWAY_URL = `${window.location.protocol}//${window.location.hostname}:${window.GATEWAY_PORT || 3001}`;
 } else {
     GATEWAY_URL = window.location.origin;
 }

@@ -2,9 +2,9 @@
 
 let GATEWAY_URL = "";
 if (window.location.protocol === 'file:') {
-    GATEWAY_URL = `http://127.0.0.1:${window.GATEWAY_PORT || 3010}`;
+    GATEWAY_URL = `http://127.0.0.1:${window.GATEWAY_PORT || 3001}`;
 } else if (window.location.port === '3007') {
-    GATEWAY_URL = `${window.location.protocol}//${window.location.hostname}:${window.GATEWAY_PORT || 3010}`;
+    GATEWAY_URL = `${window.location.protocol}//${window.location.hostname}:${window.GATEWAY_PORT || 3001}`;
 } else {
     GATEWAY_URL = window.location.origin;
 }
@@ -13,6 +13,9 @@ if (window.location.protocol === 'file:') {
 let birthMode = 'numeric';
 let calculatedIsoBirth = "";
 let clinicStatus = null;
+let selectedQuickDoc = null;
+let selectedQuickRoom = null;
+let quickDoctorsList = [];
 
 document.addEventListener("DOMContentLoaded", () => {
     initInputs();
@@ -51,6 +54,11 @@ function updateClinicStatusUI(status) {
     if (hoursDisplay && status.clinic_hours_text) {
         // Extract main operating hours if available
         hoursDisplay.textContent = status.clinic_hours_text.split("(")[0].trim();
+    }
+
+    // Render active doctor chips
+    if (status.doctors && Array.isArray(status.doctors)) {
+        renderQuickDoctorChips(status.doctors);
     }
 
     // Update clinic-info-card status tag
@@ -108,6 +116,39 @@ function closeClosedModal() {
     if (modal) {
         modal.style.display = "none";
     }
+}
+
+function renderQuickDoctorChips(doctors) {
+    const container = document.getElementById("quick-doctor-chips");
+    if (!container) return;
+    quickDoctorsList = (doctors || []).filter(d => d.active !== false);
+
+    let html = `
+        <div class="doctor-chip-card ${selectedQuickRoom === null ? 'selected' : ''}" onclick="selectQuickDoctor(this, null, null)">
+            <div class="chip-title"><i class="fa-solid fa-bolt"></i> 빠른 진료</div>
+            <div class="chip-sub">대기 적은 진료실 자동 배정</div>
+        </div>
+    `;
+
+    quickDoctorsList.forEach(d => {
+        const isSel = selectedQuickRoom === d.room_code;
+        const rNum = d.room_code || 1;
+        html += `
+            <div class="doctor-chip-card ${isSel ? 'selected' : ''}" onclick="selectQuickDoctor(this, '${d.room_code}', ${d.room_code})">
+                <div class="chip-title"><i class="fa-solid fa-user-doctor"></i> ${d.room_name || `제${rNum}진료실`}</div>
+                <div class="chip-sub">${d.doctor_name} ${d.doctor_title || '원장'}</div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function selectQuickDoctor(el, docCode, roomCode) {
+    document.querySelectorAll(".doctor-chip-card").forEach(c => c.classList.remove("selected"));
+    el.classList.add("selected");
+    selectedQuickDoc = docCode;
+    selectedQuickRoom = roomCode;
 }
 
 function initInputs() {
@@ -378,7 +419,9 @@ async function handleFormSubmit(event) {
             pcode: pcode,
             pname: pname,
             pbirth: pbirth,
-            gubun: "모바일" // Marked as mobile check-in
+            gubun: "모바일", // Marked as mobile check-in
+            doc: selectedQuickDoc || (selectedQuickRoom ? String(selectedQuickRoom) : null),
+            room_code: selectedQuickRoom
         };
 
         const resRegister = await fetch(registerUrl, {
@@ -441,6 +484,10 @@ function displaySuccessTicket(pname, pbirth, regResult) {
         if (regResult && regResult.resid1) {
             localStorage.setItem('quick_patient_resid1', regResult.resid1);
         }
+        if (regResult && regResult.room_code) {
+            localStorage.setItem('quick_patient_room_code', String(regResult.room_code));
+            localStorage.setItem('quick_patient_room_name', regResult.room_name || '');
+        }
     } catch (e) {
         console.warn("Could not save patient to localStorage", e);
     }
@@ -452,6 +499,12 @@ function displaySuccessTicket(pname, pbirth, regResult) {
     // Bind data
     document.getElementById("res-patient-name").textContent = pname;
     document.getElementById("res-patient-birth").textContent = pbirth;
+
+    const assignedRoomText = regResult && regResult.room_name 
+        ? `${regResult.room_name} (${regResult.doctor_name || ''} 원장)`
+        : "제1진료실 (김기중 대표원장)";
+    const resRoomEl = document.getElementById("res-assigned-room");
+    if (resRoomEl) resRoomEl.textContent = assignedRoomText;
 
     const now = new Date();
     const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
@@ -486,6 +539,9 @@ function resetForm() {
     clearField('pname');
     clearField('birth-numeric');
     calculatedIsoBirth = "";
+    selectedQuickDoc = null;
+    selectedQuickRoom = null;
+    renderQuickDoctorChips(quickDoctorsList);
     hideError();
 
     // Reset views

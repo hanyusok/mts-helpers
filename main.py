@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
-from config import HOST, PORT
+from config import HOST, PORT, APP_ENV, RELOAD, LOG_LEVEL
 from database.watcher import watch_db_changes
 from routers import websockets, clinic, patients, queue
 
@@ -69,6 +69,13 @@ def read_admin():
         raise HTTPException(status_code=404, detail="admin-ui/index.html not found.")
     return FileResponse(admin_index)
 
+@app.get("/kiosk")
+def read_kiosk():
+    kiosk_index = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kiosk-ui", "index.html")
+    if not os.path.exists(kiosk_index):
+        raise HTTPException(status_code=404, detail="kiosk-ui/index.html not found.")
+    return FileResponse(kiosk_index)
+
 @app.get("/config.js")
 def get_backend_config_js():
     """Serves backend port configuration dynamically to frontend apps."""
@@ -81,6 +88,7 @@ def get_backend_config_js():
 base_dir = os.path.dirname(os.path.abspath(__file__))
 app.mount("/static", StaticFiles(directory=os.path.join(base_dir, "static")), name="static")
 app.mount("/admin", StaticFiles(directory=os.path.join(base_dir, "admin-ui"), html=True), name="admin_ui")
+app.mount("/kiosk", StaticFiles(directory=os.path.join(base_dir, "kiosk-ui"), html=True), name="kiosk_ui")
 app.mount("/quick", StaticFiles(directory=os.path.join(base_dir, "quick-ui"), html=True), name="quick_ui")
 app.mount("/quicklist", StaticFiles(directory=os.path.join(base_dir, "quicklist-ui"), html=True), name="quicklist_ui")
 app.mount("/signage", StaticFiles(directory=os.path.join(base_dir, "signage-ui"), html=True), name="signage_ui")
@@ -91,5 +99,11 @@ async def favicon():
 
 if __name__ == "__main__":
     import uvicorn
+    mode_str = "DEVELOPMENT (Hot-Reload Enabled)" if RELOAD else "PRODUCTION (High-Performance Daemon)"
     logger.info(f"Starting Kim Ki-joong Pediatrics Helpers server on http://{HOST}:{PORT}")
-    uvicorn.run(app, host=HOST, port=PORT, log_level="info", proxy_headers=True, forwarded_allow_ips="*")
+    logger.info(f"Server Environment Mode: [{APP_ENV.upper()}] - {mode_str} (Log Level: {LOG_LEVEL})")
+    
+    if RELOAD:
+        uvicorn.run("main:app", host=HOST, port=PORT, reload=True, log_level=LOG_LEVEL, proxy_headers=True, forwarded_allow_ips="*")
+    else:
+        uvicorn.run(app, host=HOST, port=PORT, reload=False, log_level=LOG_LEVEL, proxy_headers=True, forwarded_allow_ips="*")

@@ -1,4 +1,4 @@
-﻿# ==============================================================================
+# ==============================================================================
 # 3_install_service.ps1
 # 김기중 소아청소년과의원 mts-helpers Windows 백그라운드 서비스(NSSM) 자동 등록 스크립트
 # 관리자 권한(Run as Administrator)으로 실행해야 합니다.
@@ -82,12 +82,13 @@ Write-Host "`n[3/4] $serviceName 서비스 등록 및 환경 설정..." -Foregro
 & $nssmExe set $serviceName AppDirectory "$projectDir"
 $serviceDisplayName = "김기중 소아청소년과의원 모바일 접수/대기열 서비스 (MTS Helpers)"
 & $nssmExe set $serviceName DisplayName "김기중 소아청소년과의원 모바일 접수/대기열 서비스 (MTS Helpers)"
-& $nssmExe set $serviceName Description "김기중 소아청소년과의원 모바일 간편접수(/quick), 실시간 대기열(/quicklist), 대기실 전광판(/signage) 백그라운드 서비스"
+& $nssmExe set $serviceName Description "김기중 소아청소년과의원 모바일 간편접수(/quick), 무인 키오스크(/kiosk), 실시간 대기열(/quicklist), 대기실 전광판(/signage) 백그라운드 서비스"
 & $nssmExe set $serviceName Start SERVICE_AUTO_START
 & $nssmExe set $serviceName AppStdout "$logFile"
 & $nssmExe set $serviceName AppStderr "$logFile"
 & $nssmExe set $serviceName AppRotateFiles 1
 & $nssmExe set $serviceName AppRotateBytes 10485760 # 10MB 자동 로테이션
+& $nssmExe set $serviceName AppEnvironmentExtra "APP_ENV=production" "EMR_GATEWAY_PORT=3001" "EMR_RELOAD=false"
 
 # 7. 서비스 시작
 Write-Host "`n[4/4] 서비스 시작..." -ForegroundColor Yellow
@@ -100,7 +101,7 @@ if ($svcStatus -and $svcStatus.Status -eq "Running") {
     Write-Host "   서비스가 정상적으로 시작되었습니다! (상태: Running)        " -ForegroundColor Green
     Write-Host "   - 서비스명: $serviceName                                   " -ForegroundColor Green
     Write-Host "   - 자동 시작: PC 부팅 시 로그인 없이 자동 실행              " -ForegroundColor Green
-    Write-Host "   - 접속 주소: http://localhost:3010                         " -ForegroundColor Green
+    Write-Host "   - 접속 주소: http://localhost:3001                         " -ForegroundColor Green
     Write-Host "============================================================" -ForegroundColor Green
 } else {
     Write-Warning "서비스 등록은 완료되었으나 현재 실행 상태가 아닙니다 ($($svcStatus.Status))."

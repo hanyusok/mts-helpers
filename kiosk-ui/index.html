@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title id="kiosk-page-title">원내 무인 키오스크 접수 | 김기중 소아청소년과의원</title>
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <link rel="stylesheet" href="style.css?v=2">
+    <!-- Load dynamic EMR REST Gateway configuration -->
+    <script src="/config.js"></script>
+
+    <style>
+        .kiosk-doc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem;
+            margin-top: 0.5rem;
+        }
+        @media (max-width: 480px) {
+            .kiosk-doc-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .kiosk-doc-card {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.75rem 0.85rem;
+            border: 2px solid var(--md-sys-color-outline-variant, #e2e8f0);
+            border-radius: 12px;
+            background: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            user-select: none;
+            text-align: left;
+        }
+        .kiosk-doc-card:hover {
+            border-color: var(--md-sys-color-primary, #0d9488);
+            background: #f0fdfa;
+        }
+        .kiosk-doc-card.selected {
+            border-color: var(--md-sys-color-primary, #0d9488);
+            background: #f0fdfa;
+            box-shadow: 0 0 0 1px var(--md-sys-color-primary, #0d9488);
+        }
+        .kiosk-doc-card .doc-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: #e0f2fe;
+            color: #0284c7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.05rem;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .kiosk-doc-card.selected .doc-icon {
+            background: var(--md-sys-color-primary, #0d9488);
+            color: #ffffff;
+        }
+        .kiosk-doc-card .doc-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .kiosk-doc-card .doc-info strong {
+            font-size: 0.92rem;
+            color: #0f172a;
+            font-weight: 700;
+        }
+        .kiosk-doc-card .doc-info span {
+            font-size: 0.76rem;
+            color: #64748b;
+            margin-top: 0.15rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="header">
+            <div class="logo-icon">
+                <!-- User Registry Icon -->
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                </svg>
+            </div>
+            <div id="kiosk-clinic-name" style="font-size: 0.95rem; font-weight: 700; color: var(--md-sys-color-primary); margin-bottom: 0.4rem; letter-spacing: 0.5px;">김기중 소아청소년과의원</div>
+            <h1>셀프 체크인 (키오스크)</h1>
+            <div class="subtitle">환자 이름과 생년월일을 입력하여 바로 접수합니다.</div>
+        </div>
+
+        <form id="checkin-form" onsubmit="handleFormSubmit(event)">
+            <div class="form-group">
+                <label for="pname">환자 이름 (Name)</label>
+                <input type="text" id="pname" placeholder="홍길동" required autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label for="pbirth">생년월일 (Birthdate)</label>
+                <input type="date" id="pbirth" required>
+            </div>
+
+            <!-- Doctor / Room Selection -->
+            <div class="form-group" id="room-selection-group" style="margin-top: 1.25rem;">
+                <label style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>희망 진료실 / 담당 원장님 선택</span>
+                    <span style="font-size:0.75rem; color:var(--md-sys-color-primary); font-weight:600;">터치하여 선택</span>
+                </label>
+                <div id="kiosk-doctors-grid" class="kiosk-doc-grid">
+                    <div class="kiosk-doc-card selected" onclick="selectKioskDoctor(this, null, null)" style="grid-column: 1 / -1;">
+                        <div class="doc-icon"><i class="fa-solid fa-bolt"></i></div>
+                        <div class="doc-info">
+                            <strong>빠른 진료 (가장 빠른 진료실 자동 배정)</strong>
+                            <span>대기 인원이 적은 진료실로 자동 배정됩니다.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button type="button" id="clear-btn" class="btn-secondary" onclick="handleClear()">
+                    <span>초기화</span>
+                </button>
+                <button type="submit" id="submit-btn" class="btn-primary">
+                    <span>접수 등록하기</span>
+                </button>
+            </div>
+        </form>
+
+        <div id="status-container" class="status-box"></div>
+
+        <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--md-sys-color-outline-variant); display: flex; justify-content: center; align-items: center; gap: 0.9rem; font-size: 0.85rem;">
+            <a href="/" style="color: var(--md-sys-color-outline); text-decoration: none;">메인 화면</a>
+            <span style="color: var(--md-sys-color-outline-variant);">|</span>
+            <a href="/quicklist/" style="color: var(--md-sys-color-primary); text-decoration: none;">실시간 대기열</a>
+            <span style="color: var(--md-sys-color-outline-variant);">|</span>
+            <a href="/signage/" style="color: var(--md-sys-color-primary); text-decoration: none;">대기실 전광판</a>
+        </div>
+    </div>
+
+    <script>
+        let GATEWAY_URL = "";
+        if (window.location.protocol === 'file:') {
+            GATEWAY_URL = `http://127.0.0.1:${window.GATEWAY_PORT || 3001}`;
+        } else if (window.location.port === '3007') {
+            GATEWAY_URL = `${window.location.protocol}//${window.location.hostname}:${window.GATEWAY_PORT || 3001}`;
+        } else {
+            GATEWAY_URL = window.location.origin;
+        }
+
+        let selectedKioskDoc = null;
+        let selectedKioskRoom = null;
+        let kioskDoctorsList = [];
+
+        async function loadClinicHeader() {
+            try {
+                const res = await fetch(`${GATEWAY_URL}/api/clinic/info`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.clinic_name) {
+                        document.getElementById("kiosk-clinic-name").textContent = data.clinic_name;
+                        document.getElementById("kiosk-page-title").textContent = `원내 키오스크 접수 | ${data.clinic_name}`;
+                    }
+                    if (Array.isArray(data.doctors)) {
+                        kioskDoctorsList = data.doctors.filter(d => d.active !== false);
+                        renderKioskDoctorCards();
+                    }
+                }
+            } catch (e) {
+                console.debug("Could not fetch clinic info:", e);
+            }
+        }
+        document.addEventListener("DOMContentLoaded", loadClinicHeader);
+
+        function renderKioskDoctorCards() {
+            const grid = document.getElementById("kiosk-doctors-grid");
+            if (!grid) return;
+
+            let html = `
+                <div class="kiosk-doc-card ${selectedKioskRoom === null ? 'selected' : ''}" onclick="selectKioskDoctor(this, null, null)" style="grid-column: 1 / -1;">
+                    <div class="doc-icon"><i class="fa-solid fa-bolt"></i></div>
+                    <div class="doc-info">
+                        <strong>빠른 진료 (가장 빠른 진료실 자동 배정)</strong>
+                        <span>대기 인원이 적은 진료실로 자동 배정됩니다.</span>
+                    </div>
+                </div>
+            `;
+
+            kioskDoctorsList.forEach(d => {
+                const isSel = selectedKioskRoom === d.room_code;
+                const rNum = d.room_code || 1;
+                html += `
+                    <div class="kiosk-doc-card ${isSel ? 'selected' : ''}" onclick="selectKioskDoctor(this, '${d.room_code}', ${d.room_code})">
+                        <div class="doc-icon"><i class="fa-solid fa-user-doctor"></i></div>
+                        <div class="doc-info">
+                            <strong>${d.room_name || `제${rNum}진료실`}</strong>
+                            <span>${d.doctor_name} ${d.doctor_title || '원장'}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        function selectKioskDoctor(el, docCode, roomCode) {
+            document.querySelectorAll(".kiosk-doc-card").forEach(c => c.classList.remove("selected"));
+            el.classList.add("selected");
+            selectedKioskDoc = docCode;
+            selectedKioskRoom = roomCode;
+        }
+
+        function handleClear() {
+            document.getElementById("pname").value = "";
+            document.getElementById("pbirth").value = "";
+            selectedKioskDoc = null;
+            selectedKioskRoom = null;
+            renderKioskDoctorCards();
+            const statusBox = document.getElementById("status-container");
+            statusBox.className = "status-box";
+            statusBox.innerHTML = "";
+        }
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+
+            const nameInput = document.getElementById("pname");
+            const birthInput = document.getElementById("pbirth");
+            const submitBtn = document.getElementById("submit-btn");
+            const clearBtn = document.getElementById("clear-btn");
+            const statusBox = document.getElementById("status-container");
+
+            const pname = nameInput.value.trim();
+            const pbirth = birthInput.value; // YYYY-MM-DD format
+
+            if (!pname || !pbirth) return;
+
+            // Reset & Loading State
+            submitBtn.disabled = true;
+            if (clearBtn) clearBtn.disabled = true;
+            statusBox.className = "status-box loading";
+            statusBox.innerHTML = '<div class="spinner"></div><span>방문 기록 검색 중...</span>';
+
+            try {
+                // 1. Query MTSDB to check if patient already exists
+                const patientsUrl = `${GATEWAY_URL}/api/patients?pname=${encodeURIComponent(pname)}`;
+                const resPatients = await fetch(patientsUrl);
+
+                let pcode = null;
+
+                if (resPatients.ok) {
+                    const patientsList = await resPatients.json();
+
+                    // Look for a patient with the exact name and matching birthdate
+                    const match = patientsList.find(p => {
+                        const dbBirth = (p.pbirth || "").trim();
+                        const birthMatch = dbBirth === pbirth || dbBirth === pbirth.replace(/-/g, "");
+                        const nameMatch = (p.pname || "").trim() === pname;
+                        return nameMatch && birthMatch;
+                    });
+
+                    if (match) {
+                        pcode = match.pcode;
+                        console.log(`Found existing patient! Pcode: ${pcode}`);
+                    } else {
+                        throw new Error("과거 진료 기록이 없는 신규 환자이거나 생년월일이 일치하지 않습니다. 접수 데스크로 문의해 주세요.");
+                    }
+                } else {
+                    throw new Error("환자 조회 서버와 통신할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+                }
+
+                // 2. Update status and register on MTSMTR
+                statusBox.innerHTML = '<div class="spinner"></div><span>진료 대기열에 등록 중...</span>';
+
+                const registerUrl = `${GATEWAY_URL}/api/mtr`;
+                const payload = {
+                    pcode: pcode,
+                    pname: pname,
+                    pbirth: pbirth,
+                    gubun: "키오",
+                    doc: selectedKioskDoc || (selectedKioskRoom ? String(selectedKioskRoom) : null),
+                    room_code: selectedKioskRoom
+                };
+
+                const resRegister = await fetch(registerUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!resRegister.ok) {
+                    const errorDetails = await resRegister.json();
+                    throw new Error(errorDetails.detail || "진료 대기열 등록에 실패했습니다.");
+                }
+
+                const result = await resRegister.json();
+                console.log("Registration success:", result);
+
+                // Success State
+                const assignedText = result.room_name ? `${result.room_name}(${result.doctor_name || ''} 원장)` : "진료실";
+                statusBox.className = "status-box success";
+                statusBox.innerHTML = `
+                    <svg style="width:1.25rem;height:1.25rem;fill:currentColor" viewBox="0 0 24 24">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span><strong>${assignedText}</strong>에 정상 접수되었습니다. 대기실에서 대기해 주시면 호명해 드립니다.</span>
+                `;
+
+                // Reset form
+                nameInput.value = "";
+                birthInput.value = "";
+
+            } catch (err) {
+                console.error("Check-in error:", err);
+                statusBox.className = "status-box error";
+                statusBox.innerHTML = `
+                    <svg style="width:1.25rem;height:1.25rem;fill:currentColor" viewBox="0 0 24 24">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                    <span>안내: ${err.message}</span>
+                `;
+            } finally {
+                submitBtn.disabled = false;
+                if (clearBtn) clearBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>

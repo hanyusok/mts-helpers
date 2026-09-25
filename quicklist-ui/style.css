@@ -762,3 +762,60 @@ html, body {
     opacity: 0.95;
     display: block;
 }
+
+/* Room Filter Tabs Bar */
+.room-filter-container {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    margin: -0.25rem 0 0.5rem;
+}
+.room-filter-container::-webkit-scrollbar {
+    display: none;
+}
+.room-tabs-bar {
+    display: flex;
+    gap: 0.5rem;
+    padding-bottom: 2px;
+}
+.room-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem 0.85rem;
+    border: 1.5px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-muted);
+    border-radius: 9999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: var(--transition);
+}
+.room-tab:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+.room-tab.active {
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
+    box-shadow: 0 2px 8px rgba(13, 148, 136, 0.25);
+    font-weight: 700;
+}
+.room-tab .tab-count {
+    background: rgba(0, 0, 0, 0.08);
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+}
+.room-tab.active .tab-count {
+    background: rgba(255, 255, 255, 0.28);
+    color: #ffffff;
+}
+
+/* Color-coded room pills in wait items */
+.item-room.room-1 { background: #dcfce7; color: #15803d; }
+.item-room.room-2 { background: #e0f2fe; color: #0369a1; }
+.item-room.room-3 { background: #ede9fe; color: #6d28d9; }
