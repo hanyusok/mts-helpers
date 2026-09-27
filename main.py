@@ -33,8 +33,8 @@ async def lifespan(app: FastAPI):
     logger.info("Cleaned up background watcher.")
 
 app = FastAPI(
-    title="Kim Ki-joong Pediatrics Helpers (mts-helpers)",
-    description="김기중 소아청소년과의원 모바일 간편접수, 실시간 대기열, 대기실 전광판 및 병원 정보 관리 서비스.",
+    title="Maegyo I Pediatrics Helpers (mts-helpers)",
+    description="매교아이 소아청소년과의원 모바일 간편접수, 실시간 대기열, 대기실 전광판 및 병원 정보 관리 서비스.",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -100,7 +100,7 @@ async def favicon():
 if __name__ == "__main__":
     import uvicorn
     mode_str = "DEVELOPMENT (Hot-Reload Enabled)" if RELOAD else "PRODUCTION (High-Performance Daemon)"
-    logger.info(f"Starting Kim Ki-joong Pediatrics Helpers server on http://{HOST}:{PORT}")
+    logger.info(f"Starting Maegyo I Pediatrics Helpers server on http://{HOST}:{PORT}")
     logger.info(f"Server Environment Mode: [{APP_ENV.upper()}] - {mode_str} (Log Level: {LOG_LEVEL})")
     
     if RELOAD:
